@@ -1,0 +1,4 @@
+routers/auxiliary.py
+routers/__pycache__/*
+routers/__pycache__/
+__pycache__/
