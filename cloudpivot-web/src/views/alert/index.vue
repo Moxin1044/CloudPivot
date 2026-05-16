@@ -38,10 +38,10 @@ const columns = [
   },
   { colKey: 'message', title: t('alert.messageLabel'), ellipsis: true },
   { colKey: 'created_at', title: t('alert.timeLabel'), width: 180 },
-  { colKey: 'actions', title: t('common.actions'), width: 150,
+  { colKey: 'actions', title: t('common.actions'), width: 180,
     cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:8px' }, [
-      row.status === 'pending' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'primary' }, on: { click: () => onAck(row.id) } }, t('alert.ackBtn')) : null,
-      row.status !== 'resolved' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'success' }, on: { click: () => onResolve(row.id) } }, t('alert.resolveBtn')) : null,
+      row.status === 'pending' ? _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => onAck(row.id) }, t('alert.ackBtn')) : null,
+      row.status !== 'resolved' ? _h('t-button', { size: 'small', variant: 'text', theme: 'success', onClick: () => onResolve(row.id) }, t('alert.resolveBtn')) : null,
     ].filter(Boolean))
   },
 ];

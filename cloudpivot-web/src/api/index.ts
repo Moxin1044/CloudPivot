@@ -81,6 +81,7 @@ export const hostApi = {
   createGroup: (data: any) => request.post('/hosts/groups', data),
   listTags: () => request.get('/hosts/tags/list'),
   createTag: (data: any) => request.post('/hosts/tags', data),
+  getMetrics: (id: number, hours?: number) => request.get(`/hosts/${id}/metrics`, { params: { hours } }),
 };
 
 // ===== Teams API =====
@@ -125,6 +126,9 @@ export const auditApi = {
   listLoginLogs: (params?: any) => request.get('/audit/login-logs', { params }),
   listRiskCommands: (params?: any) => request.get('/audit/risk-commands', { params }),
   exportCommands: (params?: any) => request.get('/audit/export/commands', { params }),
+  listSSHLoginLogs: (params?: any) => request.get('/audit/ssh-login-logs', { params }),
+  getSSHLoginAnalysis: (params?: any) => request.get('/audit/ssh-login-logs/analysis', { params }),
+  collectSSHLoginLogs: (data?: any) => request.post('/audit/ssh-login-logs/collect', data),
 };
 
 // ===== Monitor API =====

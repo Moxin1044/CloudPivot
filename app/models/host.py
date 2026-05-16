@@ -47,6 +47,7 @@ class Host(Base):
     permissions = relationship("HostPermission", back_populates="host", foreign_keys="HostPermission.host_id")
     ssh_sessions = relationship("SSHSession", back_populates="host", foreign_keys="SSHSession.host_id")
     metrics = relationship("HostMetric", back_populates="host", foreign_keys="HostMetric.host_id")
+    ssh_login_logs = relationship("SSHLoginLog", back_populates="host", foreign_keys="SSHLoginLog.host_id", cascade="all, delete-orphan")
 
 
 class HostGroup(Base):

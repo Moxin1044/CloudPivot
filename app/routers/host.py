@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, desc
 from sqlalchemy.orm import selectinload
 from typing import Optional
 from app.database import get_db
 from app.models.host import Host, HostGroup, HostTag, AuthType, HostStatus, host_tag_association
+from app.models.monitor import HostMetric
 from app.models.user import User
 from app.schemas.host import (
     HostCreate, HostUpdate, HostResponse,
@@ -13,14 +14,15 @@ from app.schemas.host import (
     HostTagCreate, HostTagResponse,
 )
 from app.dependencies import get_current_user, get_current_active_admin
-from app.core.ssh import test_ssh_connectivity
-from app.core.security import hash_password
+from app.core.ssh import test_ssh_connectivity, ssh_pool
+from app.core.security import hash_password, decrypt_data
 import time
+import re
 
 router = APIRouter(prefix="/hosts", tags=["Hosts"])
 
 
-@router.get("", response_model=list[HostResponse], summary="获取主机列表")
+@router.get("", response_model=dict, summary="获取主机列表")
 async def list_hosts(
     skip: int = 0,
     limit: int = 20,
@@ -39,7 +41,9 @@ async def list_hosts(
         query = query.where(
             (Host.name.ilike(f"%{keyword}%")) |
             (Host.ip_address.ilike(f"%{keyword}%")) |
-            (Host.hostname.ilike(f"%{keyword}%"))
+            (Host.hostname.ilike(f"%{keyword}%")) |
+            (Host.os_name.ilike(f"%{keyword}%")) |
+            (Host.public_ip.ilike(f"%{keyword}%"))
         )
     # Non-admin users only see hosts in their teams
     if not current_user.is_admin:
@@ -54,16 +58,18 @@ async def list_hosts(
             HostPermission.is_active == True,
         )
 
+    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     hosts = result.scalars().all()
 
     # Tags already eager-loaded; build response manually to include tag dicts
-    response = []
+    items = []
     for host in hosts:
         host_dict = HostResponse.model_validate(host).model_dump()
         host_dict["tags"] = [{"id": t.id, "name": t.name, "color": t.color} for t in host.tags]
-        response.append(host_dict)
-    return response
+        items.append(host_dict)
+    return {"total": total, "items": items}
 
 
 @router.post("", response_model=HostResponse, status_code=status.HTTP_201_CREATED, summary="添加主机")
@@ -145,6 +151,35 @@ async def get_host(
     return host
 
 
+@router.get("/{host_id}/metrics", summary="获取主机监控数据")
+async def get_host_metrics_chart(
+    host_id: int,
+    hours: int = 24,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from datetime import timedelta, timezone as tz
+    since = datetime.now(tz.utc) - timedelta(hours=hours)
+    result = await db.execute(
+        select(HostMetric)
+        .where(HostMetric.host_id == host_id, HostMetric.collected_at >= since)
+        .order_by(HostMetric.collected_at)
+    )
+    metrics = result.scalars().all()
+    return [
+        {
+            "collected_at": m.collected_at.isoformat() if m.collected_at else None,
+            "cpu_percent": m.cpu_percent,
+            "memory_percent": m.memory_percent,
+            "disk_percent": m.disk_percent,
+            "network_in_mbps": m.network_in_mbps,
+            "network_out_mbps": m.network_out_mbps,
+            "load_1min": m.load_1min,
+        }
+        for m in metrics
+    ]
+
+
 @router.put("/{host_id}", response_model=HostResponse, summary="更新主机")
 async def update_host(
     host_id: int,
@@ -195,6 +230,82 @@ async def delete_host(
     return {"message": "Host deleted"}
 
 
+async def _fetch_host_info(host: Host) -> dict:
+    """SSH连接到主机并获取系统信息（公网IP、OS名称、版本）"""
+    info = {"public_ip": None, "os_name": None, "os_version": None, "os_info": None}
+    password = None
+    private_key = None
+    if host.password_encrypted:
+        password = decrypt_data(host.password_encrypted)
+    if host.private_key_encrypted:
+        private_key = decrypt_data(host.private_key_encrypted)
+
+    try:
+        conn = await ssh_pool.get_connection(
+            host=host.ip_address,
+            port=host.port,
+            username=host.username,
+            password=password,
+            private_key=private_key,
+            timeout=15,
+        )
+    except Exception:
+        return info
+
+    try:
+        # 获取公网IP
+        try:
+            pub_res = await conn.run("curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me || echo ''", check=False)
+            pub_ip = pub_res.stdout.strip()
+            if pub_ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", pub_ip):
+                info["public_ip"] = pub_ip
+        except Exception:
+            pass
+
+        # 获取OS信息
+        try:
+            os_res = await conn.run("cat /etc/os-release 2>/dev/null || echo ''", check=False)
+            os_text = os_res.stdout or ""
+            os_name = None
+            os_version = None
+            for line in os_text.splitlines():
+                if line.startswith("ID="):
+                    os_name = line.split("=", 1)[1].strip().strip('"').title()
+                elif line.startswith("VERSION_ID="):
+                    os_version = line.split("=", 1)[1].strip().strip('"')
+            if os_name:
+                info["os_name"] = os_name
+            if os_version:
+                info["os_version"] = os_version
+            if os_name and os_version:
+                info["os_info"] = f"{os_name} {os_version}"
+        except Exception:
+            pass
+
+        # fallback: uname
+        if not info["os_name"]:
+            try:
+                uname_res = await conn.run("uname -s 2>/dev/null || echo ''", check=False)
+                os_name = uname_res.stdout.strip()
+                if os_name:
+                    info["os_name"] = os_name
+            except Exception:
+                pass
+        if not info["os_version"]:
+            try:
+                uname_r = await conn.run("uname -r 2>/dev/null || echo ''", check=False)
+                os_version = uname_r.stdout.strip()
+                if os_version:
+                    info["os_version"] = os_version
+            except Exception:
+                pass
+    except Exception:
+        pass
+    finally:
+        await ssh_pool.release_connection(host.ip_address, host.port, host.username)
+    return info
+
+
 @router.post("/{host_id}/test", response_model=ConnectivityTestResult, summary="连通性检测")
 async def test_connectivity(
     host_id: int,
@@ -220,6 +331,19 @@ async def test_connectivity(
     host.status = HostStatus.online if success else HostStatus.offline
     if success:
         host.last_connected_at = func.now()
+        # 连接成功时自动获取主机信息
+        try:
+            info = await _fetch_host_info(host)
+            if info.get("public_ip"):
+                host.public_ip = info["public_ip"]
+            if info.get("os_name"):
+                host.os_name = info["os_name"]
+            if info.get("os_version"):
+                host.os_version = info["os_version"]
+            if info.get("os_info"):
+                host.os_info = info["os_info"]
+        except Exception:
+            pass
     await db.flush()
 
     return ConnectivityTestResult(

@@ -5,7 +5,7 @@
         <t-card :bordered="false">
           <div style="display:flex;gap:16px;margin-bottom:16px">
             <t-select v-model="selectedHostId" :options="hostOptions" :placeholder="$t('monitor.selectHost')" style="width:250px" filterable />
-            <t-select v-model="timeRange" :options="timeOptions" style="width:120px" />
+            <t-select v-model="timeRange" :options="timeOptions" style="width:120px" @change="loadMetrics" />
             <t-button @click="loadMetrics" :loading="metricsLoading">{{ $t('common.refresh') }}</t-button>
           </div>
           <div v-if="latestMetric" style="margin-bottom:16px">
@@ -36,6 +36,7 @@
               </t-col>
             </t-row>
           </div>
+          <div ref="chartRef" style="height: 360px; margin-bottom: 16px;"></div>
           <t-table :data="metrics" :columns="metricColumns" :loading="metricsLoading" row-key="id" size="small" />
         </t-card>
       </t-tab-panel>
@@ -62,10 +63,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { hostApi, monitorApi } from '@/api';
+import * as echarts from 'echarts';
 
 const { t } = useI18n();
 const activeTab = ref('metrics');
@@ -82,6 +84,8 @@ const rules = ref<any[]>([]);
 const metricsLoading = ref(false);
 const rulesLoading = ref(false);
 const showRuleCreate = ref(false);
+const chartRef = ref<HTMLElement>();
+let chart: echarts.ECharts | null = null;
 
 const ruleForm = reactive({
   name: '', metric_type: 'cpu_percent', condition: 'gt', threshold: 90, severity: 'warning',
@@ -120,8 +124,8 @@ const ruleColumns = [
   { colKey: 'threshold', title: t('monitor.thresholdLabel') },
   { colKey: 'severity', title: t('monitor.severityLabel') },
   { colKey: 'is_enabled', title: t('common.enabled') },
-  { colKey: 'actions', title: t('common.actions'),
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeleteRule(row.id) } }, t('common.delete'))
+  { colKey: 'actions', title: t('common.actions'), width: 100,
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDeleteRule(row.id) }, t('common.delete'))
   },
 ];
 
@@ -133,6 +137,28 @@ async function loadHosts() {
   } catch (e) { /* */ }
 }
 
+function formatTime(iso: string) {
+  const d = new Date(iso);
+  return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function updateChart(data: any[]) {
+  if (!chart) return;
+  const times = data.map((d) => formatTime(d.collected_at));
+  chart.setOption({
+    tooltip: { trigger: 'axis' },
+    legend: { data: [t('monitor.cpuPercent'), t('monitor.memoryPercent'), t('monitor.diskPercent')], bottom: 0 },
+    grid: { left: '3%', right: '4%', bottom: '15%', top: '10%', containLabel: true },
+    xAxis: { type: 'category', boundaryGap: false, data: times },
+    yAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%' } },
+    series: [
+      { name: t('monitor.cpuPercent'), type: 'line', smooth: true, data: data.map((d) => d.cpu_percent ?? null) },
+      { name: t('monitor.memoryPercent'), type: 'line', smooth: true, data: data.map((d) => d.memory_percent ?? null) },
+      { name: t('monitor.diskPercent'), type: 'line', smooth: true, data: data.map((d) => d.disk_percent ?? null) },
+    ],
+  }, true);
+}
+
 async function loadMetrics() {
   if (!selectedHostId.value) return;
   metricsLoading.value = true;
@@ -140,6 +166,9 @@ async function loadMetrics() {
     metrics.value = await monitorApi.getMetrics(selectedHostId.value, timeRange.value);
     const latest: any = await monitorApi.getLatestMetric(selectedHostId.value);
     latestMetric.value = latest;
+    if (Array.isArray(metrics.value) && metrics.value.length > 0) {
+      updateChart(metrics.value);
+    }
   } finally { metricsLoading.value = false; }
 }
 
@@ -160,7 +189,23 @@ async function onDeleteRule(id: number) {
   loadRules();
 }
 
-onMounted(() => { loadHosts(); loadRules(); });
+function onResize() {
+  chart?.resize();
+}
+
+onMounted(() => {
+  loadHosts();
+  loadRules();
+  if (chartRef.value) {
+    chart = echarts.init(chartRef.value);
+  }
+  window.addEventListener('resize', onResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize);
+  chart?.dispose();
+});
 </script>
 
 <style scoped>

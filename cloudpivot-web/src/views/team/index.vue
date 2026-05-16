@@ -38,10 +38,10 @@ const columns = [
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.is_active ? 'success' : 'danger', size: 'small' } }, row.is_active ? t('common.enabled') : t('common.disabled'))
   },
   { colKey: 'created_at', title: t('common.createdAt') },
-  { colKey: 'actions', title: t('common.actions'),
+  { colKey: 'actions', title: t('common.actions'), width: 180,
     cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:8px' }, [
-      _h('t-button', { props: { variant: 'text', theme: 'primary', size: 'small' }, on: { click: () => viewMembers(row.id) } }, t('team.memberBtn')),
-      _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDelete(row.id) } }, t('common.delete')),
+      _h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => viewMembers(row.id) }, t('team.memberBtn')),
+      _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('common.delete')),
     ])
   },
 ];
@@ -67,7 +67,7 @@ async function onDelete(id: number) {
 }
 
 function viewMembers(id: number) {
-  // Could open a dialog or navigate
+  MessagePlugin.info('Team members management coming soon');
 }
 
 onMounted(() => loadData());

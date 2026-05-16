@@ -2,7 +2,10 @@
   <div class="host-page">
     <t-card :bordered="false" :title="$t('host.title')">
       <template #actions>
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <t-input v-model="searchKeyword" placeholder="搜索名称 / IP / 系统 / 公网IP" clearable style="width: 280px" @enter="onSearch" @clear="onSearch">
+            <template #suffix><t-button variant="text" size="small" @click="onSearch"><t-icon name="search" /></t-button></template>
+          </t-input>
           <t-button theme="primary" @click="showCreate = true">
             <template #icon><t-icon name="add" /></template>
             {{ $t('common.create') }}
@@ -82,6 +85,7 @@ const importLoading = ref(false);
 const importJson = ref('');
 
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 });
+const searchKeyword = ref('');
 
 const formData = reactive({
   name: '', hostname: '', ip_address: '', port: 22,
@@ -117,11 +121,21 @@ const columns = [
 async function loadData() {
   loading.value = true;
   try {
-    const res: any = await hostApi.list({ skip: (pagination.current - 1) * pagination.pageSize, limit: pagination.pageSize });
-    hosts.value = Array.isArray(res) ? res : [];
+    const res: any = await hostApi.list({
+      skip: (pagination.current - 1) * pagination.pageSize,
+      limit: pagination.pageSize,
+      keyword: searchKeyword.value || undefined,
+    });
+    hosts.value = res.items || [];
+    pagination.total = res.total || 0;
   } finally {
     loading.value = false;
   }
+}
+
+function onSearch() {
+  pagination.current = 1;
+  loadData();
 }
 
 function onPageChange({ current, pageSize }: any) {
@@ -133,9 +147,19 @@ function onPageChange({ current, pageSize }: any) {
 async function onCreate() {
   createLoading.value = true;
   try {
-    await hostApi.create(formData);
+    const res: any = await hostApi.create(formData);
     MessagePlugin.success(t('host.hostCreated'));
     showCreate.value = false;
+    // 创建后自动测试连接并获取系统信息
+    const hostId = res?.id || res?.data?.id;
+    if (hostId) {
+      try {
+        const testRes: any = await hostApi.testConnectivity(hostId);
+        if (testRes.success) {
+          MessagePlugin.success('已自动获取系统信息');
+        }
+      } catch (e) { /* ignore auto-test error */ }
+    }
     loadData();
   } finally {
     createLoading.value = false;

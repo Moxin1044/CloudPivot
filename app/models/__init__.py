@@ -6,6 +6,7 @@ from app.models.session import SSHSession, SessionCommand, SessionRecording
 from app.models.monitor import HostMetric, AlertRule, AlertRecord
 from app.models.docker import DockerHost, ContainerInfo
 from app.models.log import LoginLog, OperationLog
+from app.models.ssh_login_log import SSHLoginLog
 
 __all__ = [
     "User", "Team", "TeamMember",
@@ -15,4 +16,5 @@ __all__ = [
     "HostMetric", "AlertRule", "AlertRecord",
     "DockerHost", "ContainerInfo",
     "LoginLog", "OperationLog",
+    "SSHLoginLog",
 ]

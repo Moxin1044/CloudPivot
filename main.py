@@ -93,10 +93,28 @@ async def lifespan(app: FastAPI):
     # Ensure default admin exists
     await _ensure_default_admin()
 
+    # Start background monitor collector
+    from app.core.monitor_collector import monitor_collector_loop
+    collector_task = asyncio.create_task(monitor_collector_loop(interval_seconds=60))
+
+    # Start SSH login log collector
+    from app.core.ssh_log_collector import ssh_log_collector_loop
+    ssh_log_task = asyncio.create_task(ssh_log_collector_loop(interval_seconds=300))
+
     yield
 
     # Shutdown
     logger.info("Shutting down...")
+    collector_task.cancel()
+    ssh_log_task.cancel()
+    try:
+        await collector_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await ssh_log_task
+    except asyncio.CancelledError:
+        pass
     await ssh_pool.close_all()
     await docker_client.close()
     logger.info("Cleanup complete")

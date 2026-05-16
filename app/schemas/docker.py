@@ -32,9 +32,9 @@ class ContainerResponse(BaseModel):
     image: Optional[str] = None
     status: Optional[str] = None
     state: Optional[str] = None
-    ports: Optional[dict] = None
+    ports: Optional[list] = None
     labels: Optional[dict] = None
-    created: Optional[str] = None
+    created: Optional[int] = None
 
 
 class ContainerStatsResponse(BaseModel):
@@ -53,7 +53,7 @@ class ImageResponse(BaseModel):
     id: str
     repo_tags: Optional[List[str]] = None
     size_mb: Optional[float] = None
-    created: Optional[str] = None
+    created: Optional[int] = None
 
 
 class ContainerLogResponse(BaseModel):

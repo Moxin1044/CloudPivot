@@ -84,8 +84,8 @@ const permColumns = [
   { colKey: 'can_download', title: t('permission.canDownload') },
   { colKey: 'can_execute', title: t('permission.canExecute') },
   { colKey: 'is_active', title: t('common.status') },
-  { colKey: 'actions', title: t('common.actions'),
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeletePerm(row.id) } }, t('common.delete'))
+  { colKey: 'actions', title: t('common.actions'), width: 100,
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDeletePerm(row.id) }, t('common.delete'))
   },
 ];
 
@@ -96,8 +96,8 @@ const tempColumns = [
   { colKey: 'permission_level', title: t('permission.level') },
   { colKey: 'expires_at', title: t('permission.expiresAt') },
   { colKey: 'is_revoked', title: t('permission.revoked') },
-  { colKey: 'actions', title: t('common.actions'),
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onRevokeTemp(row.id) } }, t('permission.revokeBtn'))
+  { colKey: 'actions', title: t('common.actions'), width: 100,
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onRevokeTemp(row.id) }, t('permission.revokeBtn'))
   },
 ];
 
