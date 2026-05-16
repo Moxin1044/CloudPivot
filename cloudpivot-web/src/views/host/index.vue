@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, h } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -91,16 +91,19 @@ const keyFileInput = ref<HTMLInputElement>();
 
 const columns = [
   { colKey: 'name', title: t('common.name'), width: 150 },
-  { colKey: 'ip_address', title: 'IP', width: 140 },
-  { colKey: 'port', title: t('host.port'), width: 80 },
+  { colKey: 'ip_address', title: t('host.ip'), width: 130 },
+  { colKey: 'public_ip', title: t('host.publicIp'), width: 130 },
+  { colKey: 'os_name', title: t('host.osName'), width: 100 },
+  { colKey: 'os_version', title: t('host.osVersion'), width: 100 },
+  { colKey: 'port', title: t('host.port'), width: 70 },
   { colKey: 'username', title: t('host.username'), width: 100 },
-  { colKey: 'status', title: t('common.status'), width: 100,
+  { colKey: 'status', title: t('common.status'), width: 90,
     cell: (h: any, { row }: any) => h('t-tag', {
       props: { theme: row.status === 'online' ? 'success' : row.status === 'offline' ? 'danger' : 'default', size: 'small' }
     }, row.status === 'online' ? t('host.statusOnline') : row.status === 'offline' ? t('host.statusOffline') : t('host.statusUnknown'))
   },
-  { colKey: 'auth_type', title: t('host.authType'), width: 80 },
-  { colKey: 'actions', title: t('common.actions'), width: 240,
+  { colKey: 'auth_type', title: t('host.authType'), width: 70 },
+  { colKey: 'actions', title: t('common.actions'), width: 220,
     cell: (_h: any, { row }: any) => {
       return h('div', { style: 'display:flex;gap:8px' }, [
         h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => router.push(`/hosts/${row.id}`) }, t('host.detailBtn')),
@@ -185,5 +188,14 @@ function onKeyFileChange(e: Event) {
   (e.target as HTMLInputElement).value = '';
 }
 
-onMounted(() => loadData());
+let refreshTimer: ReturnType<typeof setInterval>;
+
+onMounted(() => {
+  loadData();
+  refreshTimer = setInterval(loadData, 15000);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(refreshTimer);
+});
 </script>

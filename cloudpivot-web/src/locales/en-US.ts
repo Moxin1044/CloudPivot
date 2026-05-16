@@ -117,6 +117,9 @@ export default {
     uploadKey: 'Upload Private Key',
     monitoring: 'Monitoring Metrics',
     os: 'OS',
+    osName: 'OS Name',
+    osVersion: 'OS Version',
+    publicIp: 'Public IP',
     lastConnected: 'Last Connected',
   },
   terminal: {

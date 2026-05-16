@@ -117,6 +117,9 @@ export default {
     uploadKey: '上传私钥文件',
     monitoring: '监控指标',
     os: '系统',
+    osName: '系统名称',
+    osVersion: '系统版本',
+    publicIp: '公网IP',
     lastConnected: '最后连接',
   },
   terminal: {

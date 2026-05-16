@@ -14,6 +14,9 @@ class HostCreate(BaseModel):
     password: Optional[str] = None
     private_key: Optional[str] = None
     description: Optional[str] = None
+    public_ip: Optional[str] = None
+    os_name: Optional[str] = None
+    os_version: Optional[str] = None
     team_id: Optional[int] = None
     group_id: Optional[int] = None
     tag_ids: Optional[List[int]] = None
@@ -29,6 +32,9 @@ class HostUpdate(BaseModel):
     password: Optional[str] = None
     private_key: Optional[str] = None
     description: Optional[str] = None
+    public_ip: Optional[str] = None
+    os_name: Optional[str] = None
+    os_version: Optional[str] = None
     team_id: Optional[int] = None
     group_id: Optional[int] = None
     tag_ids: Optional[List[int]] = None
@@ -44,6 +50,9 @@ class HostResponse(BaseModel):
     username: str
     status: HostStatus
     os_info: Optional[str] = None
+    os_name: Optional[str] = None
+    os_version: Optional[str] = None
+    public_ip: Optional[str] = None
     description: Optional[str] = None
     team_id: Optional[int] = None
     group_id: Optional[int] = None

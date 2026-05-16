@@ -229,6 +229,7 @@ async def websocket_ssh(
                                                 is_blocked=True,
                                             )
                                             db.add(cmd_log)
+                                            await db.commit()
                                             continue
 
                                     # Log command
@@ -240,6 +241,7 @@ async def websocket_ssh(
                                         is_blocked=False,
                                     )
                                     db.add(cmd_log)
+                                    await db.commit()
 
                                     # Send to SSH
                                     process.stdin.write(command)
@@ -280,6 +282,7 @@ async def websocket_ssh(
                         duration = (ssh_session.ended_at - ssh_session.started_at).total_seconds()
                         ssh_session.duration_seconds = int(duration)
                     await db.flush()
+                    await db.commit()
 
         except Exception as e:
             logger.error(f"WebSSH error: {e}")

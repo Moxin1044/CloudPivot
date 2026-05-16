@@ -56,12 +56,14 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
         login_log.is_success = False
         login_log.fail_reason = "Invalid credentials"
         db.add(login_log)
+        await db.commit()
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     if not user.is_active:
         login_log.is_success = False
         login_log.fail_reason = "Account disabled"
         db.add(login_log)
+        await db.commit()
         raise HTTPException(status_code=403, detail="Account is disabled")
 
     # Update login info
@@ -71,6 +73,7 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
     login_log.user_id = user.id
     login_log.is_success = True
     db.add(login_log)
+    await db.commit()
 
     access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
     refresh_token = create_refresh_token({"sub": str(user.id)})
