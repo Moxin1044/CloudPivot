@@ -194,6 +194,7 @@ async def websocket_ssh(
 
                 # Read from WebSocket and forward to SSH
                 async def read_ws():
+                    cmd_buffer = ""
                     try:
                         while True:
                             data = await websocket.receive_text()
@@ -202,27 +203,19 @@ async def websocket_ssh(
                                 msg_type = msg.get("type", "input")
 
                                 if msg_type == "input":
-                                    data = msg.get("data", "")
+                                    char = msg.get("data", "")
                                     # Send to SSH immediately (character by character)
-                                    process.stdin.write(data)
+                                    process.stdin.write(char)
                                     await process.stdin.drain()
 
                                     # Accumulate command buffer until Enter (\r or \n)
-                                    if not hasattr(read_ws, "_cmd_buffer"):
-                                        read_ws._cmd_buffer = {}
-                                    buf = read_ws._cmd_buffer.get(tab_id, "") + data
-                                    # Handle backspace / delete
-                                    if "\x7f" in buf or "\b" in buf:
-                                        buf = buf.replace("\x7f", "\b")
-                                        while "\b" in buf:
-                                            idx = buf.index("\b")
-                                            buf = buf[:max(0, idx - 1)] + buf[idx + 1:]
-                                    read_ws._cmd_buffer[tab_id] = buf
-
-                                    # Only log when user presses Enter
-                                    if "\r" in buf or "\n" in buf:
-                                        command = buf.splitlines()[0].strip()
-                                        read_ws._cmd_buffer[tab_id] = ""
+                                    if char == "\x7f" or char == "\b":
+                                        # Backspace: remove last char from buffer
+                                        cmd_buffer = cmd_buffer[:-1]
+                                    elif char == "\r" or char == "\n":
+                                        # Enter: log the complete command
+                                        command = cmd_buffer.strip()
+                                        cmd_buffer = ""
                                         if command:
                                             # Check permission and risk
                                             perm_result = await db.execute(
@@ -242,7 +235,6 @@ async def websocket_ssh(
                                                         "risk": risk.value,
                                                         "message": f"Command blocked (risk: {risk.value})",
                                                     })
-                                                    # Log blocked command
                                                     cmd_log = SessionCommand(
                                                         session_id=ssh_session.id,
                                                         command=command,
@@ -263,6 +255,12 @@ async def websocket_ssh(
                                             )
                                             db.add(cmd_log)
                                             await db.commit()
+                                    elif char == "\x03":
+                                        # Ctrl+C: clear buffer
+                                        cmd_buffer = ""
+                                    elif len(char) == 1 and char.isprintable():
+                                        # Normal printable char: add to buffer
+                                        cmd_buffer += char
 
                                 elif msg_type == "resize":
                                     cols = msg.get("cols", 80)
@@ -277,8 +275,8 @@ async def websocket_ssh(
                                 await process.stdin.drain()
                     except WebSocketDisconnect:
                         pass
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.error(f"WebSSH read_ws error: {e}")
 
                 # Run both tasks
                 read_task = asyncio.create_task(read_ssh())
