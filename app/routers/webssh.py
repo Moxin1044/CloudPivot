@@ -7,7 +7,7 @@ import json
 import uuid
 import time
 from datetime import datetime, timezone
-from app.database import get_db
+from app.database import get_db, async_session
 from app.models.host import Host
 from app.models.session import SSHSession, SessionCommand, SessionRecording, SessionStatus, RiskLevel
 from app.models.permission import HostPermission, PermissionLevel, TemporaryPermission
@@ -92,8 +92,7 @@ async def websocket_ssh(
     user_id = int(payload.get("sub"))
     await websocket.accept()
 
-    # Get DB session
-    from app.database import async_session
+    # Get DB session for initial setup
     async with async_session() as db:
         # Get user
         user_result = await db.execute(select(User).where(User.id == user_id))
@@ -230,47 +229,53 @@ async def websocket_ssh(
                     command = cmd_buffer.strip()
                     cmd_buffer = ""
                     if command:
-                        perm_result = await db.execute(
-                            select(HostPermission).where(
-                                HostPermission.host_id == host_id,
-                                HostPermission.is_active == True,
-                            ).limit(1)
-                        )
-                        perm = perm_result.scalar_one_or_none()
+                        # Use a fresh DB session for permission check
+                        async with async_session() as perm_db:
+                            perm_result = await perm_db.execute(
+                                select(HostPermission).where(
+                                    HostPermission.host_id == host_id,
+                                    HostPermission.is_active == True,
+                                ).limit(1)
+                            )
+                            perm = perm_result.scalar_one_or_none()
 
-                        blocked = False
-                        risk = RiskLevel.safe
-                        if perm:
-                            allowed, risk = check_permission_level(perm, command)
-                            if not allowed:
-                                blocked = True
-                                process.stdin.write(b"\x03")
-                                await process.stdin.drain()
-                                await websocket.send_json({
-                                    "type": "blocked",
-                                    "command": command,
-                                    "risk": risk.value,
-                                    "message": f"Command blocked (risk: {risk.value})",
-                                })
-                                db.add(SessionCommand(
+                            blocked = False
+                            risk = RiskLevel.safe
+                            if perm:
+                                allowed, risk = check_permission_level(perm, command)
+                                if not allowed:
+                                    blocked = True
+                                    process.stdin.write(b"\x03")
+                                    await process.stdin.drain()
+                                    await websocket.send_json({
+                                        "type": "blocked",
+                                        "command": command,
+                                        "risk": risk.value,
+                                        "message": f"Command blocked (risk: {risk.value})",
+                                    })
+                                    perm_db.add(SessionCommand(
+                                        session_id=ssh_session.id,
+                                        command=command,
+                                        risk_level=risk,
+                                        is_blocked=True,
+                                    ))
+                                    await perm_db.commit()
+
+                            if not blocked:
+                                risk = check_command_risk(command)
+                                perm_db.add(SessionCommand(
                                     session_id=ssh_session.id,
                                     command=command,
                                     risk_level=risk,
-                                    is_blocked=True,
+                                    is_blocked=False,
                                 ))
-                                await db.commit()
-
-                        if not blocked:
-                            risk = check_command_risk(command)
-                            db.add(SessionCommand(
-                                session_id=ssh_session.id,
-                                command=command,
-                                risk_level=risk,
-                                is_blocked=False,
-                            ))
-                            await db.commit()
-                            process.stdin.write(char.encode("utf-8"))
-                            await process.stdin.drain()
+                                await perm_db.commit()
+                                process.stdin.write(char.encode("utf-8"))
+                                await process.stdin.drain()
+                    else:
+                        # Empty command, just forward the enter key
+                        process.stdin.write(char.encode("utf-8"))
+                        await process.stdin.drain()
                 elif char == "\x7f" or char == "\b":
                     cmd_buffer = cmd_buffer[:-1]
                     process.stdin.write(b"\x7f")
@@ -319,15 +324,16 @@ async def websocket_ssh(
     except Exception as e:
         logger.error(f"WebSSH error: {e}", exc_info=True)
     finally:
-        # Update session
+        # Update session using a fresh DB session
         try:
-            ssh_session.status = SessionStatus.closed
-            ssh_session.ended_at = datetime.now(timezone.utc)
-            if ssh_session.started_at:
-                duration = (ssh_session.ended_at - ssh_session.started_at).total_seconds()
-                ssh_session.duration_seconds = int(duration)
-            await db.flush()
-            await db.commit()
+            async with async_session() as close_db:
+                ssh_session.status = SessionStatus.closed
+                ssh_session.ended_at = datetime.now(timezone.utc)
+                if ssh_session.started_at:
+                    duration = (ssh_session.ended_at - ssh_session.started_at).total_seconds()
+                    ssh_session.duration_seconds = int(duration)
+                close_db.add(ssh_session)
+                await close_db.commit()
         except Exception:
             pass
 

@@ -253,42 +253,77 @@ async def download_file(
     db: AsyncSession = Depends(get_db),
 ):
     host, conn = await get_host_connection(host_id, db)
+    sftp = None
     try:
-        async with conn.start_sftp_client() as sftp:
+        sftp = await conn.start_sftp_client()
+        try:
+            attr = await sftp.stat(path)
+            if stat.S_ISDIR(attr.permissions):
+                raise HTTPException(status_code=400, detail="Cannot download a directory")
+        except (OSError, IOError) as e:
+            raise HTTPException(status_code=404, detail=f"File not found: {str(e)}")
+
+        filename = os.path.basename(path)
+        file_size = attr.size
+
+        async def file_stream():
+            f = None
             try:
-                attr = await sftp.stat(path)
-                if stat.S_ISDIR(attr.permissions):
-                    raise HTTPException(status_code=400, detail="Cannot download a directory")
-            except (OSError, IOError) as e:
-                raise HTTPException(status_code=404, detail=f"File not found: {str(e)}")
-
-            filename = os.path.basename(path)
-
-            async def file_stream():
+                f = await sftp.open(path, 'rb')
+                while True:
+                    chunk = await f.read(65536)
+                    if not chunk:
+                        break
+                    yield chunk
+            finally:
                 try:
-                    async with sftp.open(path, 'rb') as f:
-                        while True:
-                            chunk = await f.read(65536)
-                            if not chunk:
-                                break
-                            yield chunk
-                finally:
+                    if f:
+                        await f.close()
+                except Exception:
+                    pass
+                try:
+                    if sftp:
+                        await sftp.exit()
+                except Exception:
+                    pass
+                try:
                     conn.close()
                     await conn.wait_closed()
+                except Exception:
+                    pass
 
-            return StreamingResponse(
-                file_stream(),
-                media_type="application/octet-stream",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{filename}"',
-                    "Content-Length": str(attr.size),
-                },
-            )
+        return StreamingResponse(
+            file_stream(),
+            media_type="application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Content-Length": str(file_size),
+            },
+        )
     except HTTPException:
+        # Clean up on error before streaming starts
+        try:
+            if sftp:
+                await sftp.exit()
+        except Exception:
+            pass
+        try:
+            conn.close()
+            await conn.wait_closed()
+        except Exception:
+            pass
         raise
     except Exception as e:
-        conn.close()
-        await conn.wait_closed()
+        try:
+            if sftp:
+                await sftp.exit()
+        except Exception:
+            pass
+        try:
+            conn.close()
+            await conn.wait_closed()
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
 
 

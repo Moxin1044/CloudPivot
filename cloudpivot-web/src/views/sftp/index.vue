@@ -329,25 +329,28 @@ async function onDownload() {
 }
 
 // Delete
-async function onDeleteFile() {
+function onDeleteFile() {
   if (!selectedFile.value || !selectedHostId.value) return;
-  const confirmed = await DialogPlugin.confirm({
+  const confirmDialog = DialogPlugin.confirm({
     header: t('common.delete'),
     body: t('sftp.confirmDelete', { name: selectedFile.value.name }),
     theme: 'danger',
+    onConfirm: async () => {
+      loading.value = true;
+      try {
+        await sftpApi.deleteFile(selectedHostId.value!, selectedFile.value!.path);
+        selectedRowKeys.value = [];
+        await refreshList();
+        MessagePlugin.success(t('common.success'));
+      } catch (e: any) {
+        MessagePlugin.error(e.response?.data?.detail || t('common.failed'));
+      } finally {
+        loading.value = false;
+      }
+      confirmDialog.destroy();
+    },
+    onClose: () => confirmDialog.destroy(),
   });
-  if (confirmed !== true) return;
-  loading.value = true;
-  try {
-    await sftpApi.deleteFile(selectedHostId.value, selectedFile.value.path);
-    selectedRowKeys.value = [];
-    await refreshList();
-    MessagePlugin.success(t('common.success'));
-  } catch (e: any) {
-    MessagePlugin.error(e.response?.data?.detail || t('common.failed'));
-  } finally {
-    loading.value = false;
-  }
 }
 
 // Mkdir
