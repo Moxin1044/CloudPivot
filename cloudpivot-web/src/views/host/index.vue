@@ -45,6 +45,13 @@
         </t-form-item>
         <t-form-item v-else :label="$t('host.privateKey')">
           <t-textarea v-model="formData.private_key" :autosize="{ minRows: 3, maxRows: 6 }" />
+          <div style="margin-top:8px">
+            <t-button variant="outline" size="small" @click="keyFileInput?.click()">
+              <template #icon><t-icon name="upload" /></template>
+              {{ $t('host.uploadKey') }}
+            </t-button>
+            <input ref="keyFileInput" type="file" style="display:none" accept=".pem,.key,.ppk,text/plain" @change="onKeyFileChange" />
+          </div>
         </t-form-item>
         <t-form-item :label="$t('common.description')"><t-textarea v-model="formData.description" /></t-form-item>
       </t-form>
@@ -80,6 +87,7 @@ const formData = reactive({
   name: '', hostname: '', ip_address: '', port: 22,
   auth_type: 'password', username: '', password: '', private_key: '', description: '',
 });
+const keyFileInput = ref<HTMLInputElement>();
 
 const columns = [
   { colKey: 'name', title: t('common.name'), width: 150 },
@@ -164,6 +172,17 @@ async function onImport() {
   } finally {
     importLoading.value = false;
   }
+}
+
+function onKeyFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    formData.private_key = String(reader.result || '');
+  };
+  reader.readAsText(file);
+  (e.target as HTMLInputElement).value = '';
 }
 
 onMounted(() => loadData());

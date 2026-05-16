@@ -44,12 +44,18 @@ class SSHConnectionPool:
                     return conn_info.conn
                 del self._pool[key]
 
+        client_keys = None
+        if private_key:
+            if "-----BEGIN" in private_key:
+                client_keys = [asyncssh.import_private_key(private_key)]
+            else:
+                client_keys = [private_key]
         connect_kwargs = {
             "host": host,
             "port": port,
             "username": username,
             "known_hosts": None,
-            "client_keys": [private_key] if private_key else None,
+            "client_keys": client_keys,
             "password": password if not private_key else None,
         }
         if timeout is not None:
@@ -123,7 +129,10 @@ async def test_ssh_connectivity(
             "connect_timeout": timeout,
         }
         if private_key:
-            connect_kwargs["client_keys"] = [private_key]
+            if "-----BEGIN" in private_key:
+                connect_kwargs["client_keys"] = [asyncssh.import_private_key(private_key)]
+            else:
+                connect_kwargs["client_keys"] = [private_key]
         elif password:
             connect_kwargs["password"] = password
 

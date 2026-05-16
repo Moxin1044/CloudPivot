@@ -114,6 +114,7 @@ export default {
     statusUnknown: '未知',
     passwordAuth: '密码',
     keyAuth: '密钥',
+    uploadKey: '上传私钥文件',
     monitoring: '监控指标',
     os: '系统',
     lastConnected: '最后连接',

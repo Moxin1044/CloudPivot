@@ -114,6 +114,7 @@ export default {
     statusUnknown: 'Unknown',
     passwordAuth: 'Password',
     keyAuth: 'Key',
+    uploadKey: 'Upload Private Key',
     monitoring: 'Monitoring Metrics',
     os: 'OS',
     lastConnected: 'Last Connected',
