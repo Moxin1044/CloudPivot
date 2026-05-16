@@ -68,14 +68,16 @@ const sockets = ref<Record<string, WebSocket>>({});
 function setTerminalRef(tabId: string, el: any) {
   if (el) {
     terminalRefs.value[tabId] = el;
-  } else {
-    // DOM 元素被销毁时，清理 Terminal 实例
+    // Re-attach terminal to new DOM element if terminal exists
     const term = terminals.value[tabId];
     if (term) {
-      term.dispose();
-      delete terminals.value[tabId];
-      delete fitAddons.value[tabId];
+      term.open(el);
+      const fitAddon = fitAddons.value[tabId];
+      if (fitAddon) {
+        fitAddon.fit();
+      }
     }
+  } else {
     delete terminalRefs.value[tabId];
   }
 }
@@ -108,11 +110,14 @@ function initTerminal(tabId: string) {
   const el = terminalRefs.value[tabId];
   if (!el) return;
 
-  // 防止同一 tabId 下重复创建 Terminal（标签切换时 DOM 会重建）
+  // If terminal already exists, just re-open in new DOM element
   if (terminals.value[tabId]) {
-    terminals.value[tabId].dispose();
-    delete terminals.value[tabId];
-    delete fitAddons.value[tabId];
+    terminals.value[tabId].open(el);
+    const fitAddon = fitAddons.value[tabId];
+    if (fitAddon) {
+      fitAddon.fit();
+    }
+    return;
   }
 
   const term = new Terminal({
@@ -143,7 +148,6 @@ function initTerminal(tabId: string) {
     },
     scrollback: 10000,
     allowTransparency: false,
-    convertEol: true,
   });
 
   const fitAddon = new FitAddon();
@@ -157,8 +161,6 @@ function initTerminal(tabId: string) {
   fitAddons.value[tabId] = fitAddon;
 
   term.onData((data) => {
-    // 确保当前 tab 仍然是激活 tab，防止标签切换时旧 handler 发送数据到新 tab 的 socket
-    if (activeTab.value !== tabId) return;
     const ws = sockets.value[tabId];
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'input', data }));
@@ -205,24 +207,28 @@ function connect() {
   };
 
   ws.onmessage = (event) => {
-    // 确保当前 tab 仍然是激活 tab
-    if (activeTab.value !== tabId) return;
     const term = terminals.value[tabId];
     if (!term) return;
 
     if (typeof event.data === 'string') {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.type === 'connected') {
-          term.write(`\r\n\x1b[32mConnected to ${msg.host} as ${msg.username}\x1b[0m\r\n`);
-        } else if (msg.type === 'error') {
-          term.write(`\r\n\x1b[31m${msg.message}\x1b[0m\r\n`);
-        } else if (msg.type === 'blocked') {
-          term.write(`\r\n\x1b[31m[BLOCKED] ${msg.command} (${msg.risk})\x1b[0m\r\n`);
+        // Only handle control messages that have a _sys flag
+        if (msg._sys) {
+          if (msg.type === 'connected') {
+            term.write(`\r\n\x1b[32mConnected to ${msg.host} as ${msg.username}\x1b[0m\r\n`);
+          } else if (msg.type === 'error') {
+            term.write(`\r\n\x1b[31m${msg.message}\x1b[0m\r\n`);
+          } else if (msg.type === 'blocked') {
+            term.write(`\r\n\x1b[31m[BLOCKED] ${msg.command} (${msg.risk})\x1b[0m\r\n`);
+          }
+          return;
         }
       } catch {
-        term.write(event.data);
+        // Not JSON — fall through to write as raw SSH output
       }
+      // Raw SSH output (including strings that look like JSON)
+      term.write(event.data);
     } else if (event.data instanceof ArrayBuffer) {
       const decoder = new TextDecoder();
       term.write(decoder.decode(event.data));

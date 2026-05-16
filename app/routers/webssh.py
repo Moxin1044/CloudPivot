@@ -137,7 +137,7 @@ async def websocket_ssh(
 
             ssh_conn = await asyncssh.connect(**connect_kwargs)
         except Exception as e:
-            await websocket.send_json({"type": "error", "message": f"SSH connection failed: {e}"})
+            await websocket.send_json({"_sys": True, "type": "error", "message": f"SSH connection failed: {e}"})
             await websocket.close(code=4006, reason="SSH connection failed")
             return
 
@@ -165,14 +165,15 @@ async def websocket_ssh(
     process = None
     try:
         process = await ssh_conn.create_process(
-            term_type="xterm-256color",
-            term_size=(80, 24),
+            term_type="xterm",
+            term_size=(24, 80),
         )
         webssh_session.ssh_writer = process.stdin
         webssh_session.ssh_reader = process.stdout
 
         # Send connected message
         await websocket.send_json({
+            "_sys": True,
             "type": "connected",
             "session_id": session_id,
             "host": host.ip_address,
@@ -254,6 +255,7 @@ async def websocket_ssh(
                                             process.stdin.write("\x03")
                                             await process.stdin.drain()
                                             await websocket.send_json({
+                                                "_sys": True,
                                                 "type": "blocked",
                                                 "command": command,
                                                 "risk": risk.value,
@@ -288,7 +290,8 @@ async def websocket_ssh(
                             process.stdin.write(char)
                             await process.stdin.drain()
                     elif char == "\x7f" or char == "\b":
-                        cmd_buffer = cmd_buffer[:-1]
+                        if cmd_buffer:
+                            cmd_buffer = cmd_buffer[:-1]
                         process.stdin.write("\x7f")
                         await process.stdin.drain()
                     elif char == "\x03":
@@ -296,8 +299,7 @@ async def websocket_ssh(
                         process.stdin.write("\x03")
                         await process.stdin.drain()
                     else:
-                        if len(char) == 1 and char.isprintable():
-                            cmd_buffer += char
+                        cmd_buffer += char
                         try:
                             process.stdin.write(char)
                             await process.stdin.drain()
@@ -311,7 +313,7 @@ async def websocket_ssh(
                     process.resize(cols, rows)
 
                 elif msg_type == "ping":
-                    await websocket.send_json({"type": "pong"})
+                    await websocket.send_json({"_sys": True, "type": "pong"})
 
         # Run both tasks concurrently — when either finishes (error/close), the other is cancelled
         ssh_task = asyncio.create_task(read_ssh())
