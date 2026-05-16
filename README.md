@@ -175,8 +175,8 @@ CloudPivot-Server/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-org/CloudPivot-Server.git
-cd CloudPivot-Server
+git clone https://github.com/Moxin1044/CloudPivot.git
+cd CloudPivot
 ```
 
 ### 2. 后端启动
