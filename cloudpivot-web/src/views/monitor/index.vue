@@ -10,17 +10,17 @@
 
         <!-- Dashboard Gauge Row -->
         <t-row :gutter="[12,12]" v-if="latestMetric" style="margin-bottom:12px">
-          <t-col :span="6">
+          <t-col :span="4">
             <div class="gauge-card">
               <div ref="cpuGaugeRef" class="gauge-chart"></div>
             </div>
           </t-col>
-          <t-col :span="6">
+          <t-col :span="4">
             <div class="gauge-card">
               <div ref="memGaugeRef" class="gauge-chart"></div>
             </div>
           </t-col>
-          <t-col :span="6">
+          <t-col :span="4">
             <div class="gauge-card">
               <div ref="diskGaugeRef" class="gauge-chart"></div>
             </div>
@@ -30,6 +30,10 @@
               <div class="info-row"><span class="info-label">{{ $t('monitor.networkIn') }}</span><span class="info-value">{{ latestMetric.network_in_kbps?.toFixed(1) || '-' }} <small>KB/s</small></span></div>
               <div class="info-row"><span class="info-label">{{ $t('monitor.networkOutKbps') }}</span><span class="info-value">{{ latestMetric.network_out_kbps?.toFixed(1) || '-' }} <small>KB/s</small></span></div>
               <div class="info-row"><span class="info-label">{{ $t('monitor.load1') }}</span><span class="info-value">{{ latestMetric.load_1min?.toFixed(2) || '-' }}</span></div>
+            </div>
+          </t-col>
+          <t-col :span="6">
+            <div class="info-card">
               <div class="info-row"><span class="info-label">MEM</span><span class="info-value">{{ latestMetric.memory_used_gb?.toFixed(1) || '-' }} / {{ latestMetric.memory_total_gb?.toFixed(1) || '-' }} <small>GB</small></span></div>
               <div class="info-row"><span class="info-label">DISK</span><span class="info-value">{{ latestMetric.disk_used_gb?.toFixed(1) || '-' }} / {{ latestMetric.disk_total_gb?.toFixed(1) || '-' }} <small>GB</small></span></div>
               <div class="info-row"><span class="info-label">Load5/15</span><span class="info-value">{{ latestMetric.load_5min?.toFixed(2) || '-' }} / {{ latestMetric.load_15min?.toFixed(2) || '-' }}</span></div>
@@ -345,17 +349,17 @@ onBeforeUnmount(() => {
 }
 .gauge-chart {
   width: 100%;
-  height: 220px;
+  height: 190px;
 }
 .info-card {
   background: var(--td-bg-color-container);
   border-radius: 8px;
-  padding: 12px 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
-  height: 228px;
+  gap: 12px;
+  height: 198px;
 }
 .info-row {
   display: flex;
