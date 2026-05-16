@@ -304,63 +304,6 @@ Authorization: Bearer <access_token>
 
 ### 1. 认证模块 (`/auth` + `/auth/captcha`)
 
-#### POST `/auth/register` 🔓
-
-用户注册。受站点配置 `allow_register` 控制。
-
-**请求体**：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| username | string | ✅ | 3-64字符 |
-| email | string | ✅ | 邮箱 |
-| password | string | ✅ | 6-128字符 |
-| display_name | string | ❌ | 显示名 |
-
-**响应**：`UserResponse`
-
-#### POST `/auth/login` 🔓
-
-用户登录，返回 JWT 令牌对。
-
-**请求体**：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| username | string | ✅ | 3-64字符 |
-| password | string | ✅ | 6-128字符 |
-| captcha_id | string | ❌ | 验证码 ID |
-| captcha_code | string | ❌ | 验证码 |
-
-**响应**：
-
-```json
-{
-  "access_token": "eyJ...",
-  "refresh_token": "eyJ...",
-  "token_type": "bearer",
-  "expires_in": 28800
-}
-```
-
-#### POST `/auth/refresh` 🔓
-
-使用 Refresh Token 换取新的令牌对（Rotation 模式，旧 Token 加入黑名单）。
-
-**请求体**：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| refresh_token | string | ✅ | Refresh Token |
-
-**响应**：同登录响应 `TokenResponse`
-
-#### POST `/auth/logout` 🔑
-
-登出，将当前 Access Token 加入黑名单。
-
-**响应**：`{"message": "Logged out successfully"}`
-
 #### GET `/auth/captcha` 🔓
 
 获取验证码图片，返回 SVG base64 编码的验证码。验证码一次性使用，默认有效期 300 秒。
@@ -374,19 +317,131 @@ Authorization: Bearer <access_token>
 }
 ```
 
+#### POST `/auth/register` 🔓
+
+用户注册。受站点配置 `allow_register` 控制。
+
+**请求体**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| username | string | ✅ | 3-64字符 |
+| email | string | ✅ | 邮箱 |
+| password | string | ✅ | 6-128字符 |
+| display_name | string | ❌ | 显示名，默认同 username |
+
+**响应**：`UserResponse`
+
+```json
+{
+  "id": 2,
+  "username": "newuser",
+  "email": "user@example.com",
+  "display_name": "New User",
+  "role": "viewer",
+  "status": "active",
+  "language": "zh-CN",
+  "theme": "light",
+  "avatar_url": null,
+  "notification_email": null,
+  "feishu_webhook": null,
+  "dingtalk_webhook": null,
+  "notify_channels": null,
+  "last_login_at": null,
+  "last_login_ip": null,
+  "created_at": "2026-05-17T05:00:00+00:00",
+  "updated_at": "2026-05-17T05:00:00+00:00"
+}
+```
+
+#### POST `/auth/login` 🔓
+
+用户登录，返回 JWT 令牌对。连续失败超过 `LOGIN_MAX_ATTEMPTS` 次后锁定 `LOGIN_LOCKOUT_MINUTES` 分钟。
+
+**请求体**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| username | string | ✅ | 3-64字符 |
+| password | string | ✅ | 6-128字符 |
+| captcha_id | string | ❌ | 验证码 ID（CAPTCHA_ENABLED=true 时必填） |
+| captcha_code | string | ❌ | 验证码（CAPTCHA_ENABLED=true 时必填） |
+
+**响应**：
+
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "token_type": "bearer",
+  "expires_in": 28800
+}
+```
+
+**错误码**：
+- `400` — 验证码无效
+- `401` — 用户名或密码错误
+- `403` — 账号已禁用
+- `429` — 登录尝试次数过多，已锁定
+
+#### POST `/auth/refresh` 🔓
+
+使用 Refresh Token 换取新的令牌对（Rotation 模式，旧 Token 加入黑名单）。若用户 `token_version` 已变更（如修改密码后），则 Refresh Token 失效，需重新登录。
+
+**请求体**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| refresh_token | string | ✅ | Refresh Token |
+
+**响应**：同登录响应 `TokenResponse`
+
+**错误码**：
+- `401` — Token 已撤销 / 无效 / 版本不匹配 / 用户不存在或已禁用
+
+#### POST `/auth/logout` 🔑
+
+登出，将当前 Access Token 加入黑名单。
+
+**请求头**：`Authorization: Bearer <access_token>`
+
+**响应**：`{"message": "Logged out successfully"}`
+
 ---
 
 ### 2. 用户管理模块 (`/users`)
 
-#### GET `/users/me` 🔑
+#### GET `/users/me` �
 
 获取当前登录用户信息。
 
 **响应**：`UserResponse`
 
+```json
+{
+  "id": 1,
+  "username": "admin",
+  "email": "admin@cloudpivot.localhost",
+  "display_name": "Super Admin",
+  "role": "admin",
+  "status": "active",
+  "language": "zh-CN",
+  "theme": "light",
+  "avatar_url": null,
+  "notification_email": null,
+  "feishu_webhook": null,
+  "dingtalk_webhook": null,
+  "notify_channels": null,
+  "last_login_at": "2026-05-17T04:30:00+00:00",
+  "last_login_ip": "127.0.0.1",
+  "created_at": "2026-05-17T00:00:00+00:00",
+  "updated_at": "2026-05-17T04:30:00+00:00"
+}
+```
+
 #### PUT `/users/me` 🔑
 
-更新当前用户信息（语言、主题、显示名、邮箱）。
+更新当前用户信息。
 
 **请求体**：
 
@@ -396,9 +451,9 @@ Authorization: Bearer <access_token>
 | display_name | string | ❌ | 显示名 |
 | language | string | ❌ | 语言 (zh-CN/en) |
 | theme | string | ❌ | 主题 (light/dark) |
-| password | string | ❌ | 新密码 |
-| role | string | ❌ | 角色 |
-| status | string | ❌ | 状态 |
+| password | string | ❌ | 新密码 (6-128字符) |
+| role | string | ❌ | 角色 (admin/viewer) |
+| status | string | ❌ | 状态 (active/disabled) |
 
 **响应**：`UserResponse`
 
@@ -411,15 +466,15 @@ Authorization: Bearer <access_token>
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | notification_email | string | ❌ | 通知邮箱 |
-| feishu_webhook | string | ❌ | 飞书 Webhook |
-| dingtalk_webhook | string | ❌ | 钉钉 Webhook |
-| notify_channels | string | ❌ | 通知渠道，逗号分隔 (email,feishu,dingtalk) |
+| feishu_webhook | string | ❌ | 飞书 Webhook URL |
+| dingtalk_webhook | string | ❌ | 钉钉 Webhook URL |
+| notify_channels | string | ❌ | 通知渠道，逗号分隔 (email,feishu,dingtalk,webhook) |
 
 **响应**：`UserResponse`
 
 #### PUT `/users/me/password` 🔑
 
-修改密码。修改后 `token_version` 递增，所有已有 Token 失效。
+修改密码。修改后 `token_version` 递增，所有已有 Token（包括 Refresh Token）立即失效，需重新登录。
 
 **请求体**：
 
@@ -430,11 +485,21 @@ Authorization: Bearer <access_token>
 
 **响应**：`{"message": "Password changed successfully"}`
 
+**错误码**：`400` — 旧密码不正确
+
 #### GET `/users` 👑
 
 获取用户列表（仅管理员）。
 
-**查询参数**：`skip` (默认0), `limit` (默认20), `role`, `status`, `search`
+**查询参数**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| skip | int | 偏移量 (默认0) |
+| limit | int | 每页数量 (默认20) |
+| role | string | 按角色筛选 (admin/viewer) |
+| status | string | 按状态筛选 (active/disabled) |
+| search | string | 搜索 (匹配用户名/邮箱/显示名) |
 
 **响应**：`list[UserResponse]`
 
@@ -449,7 +514,7 @@ Authorization: Bearer <access_token>
 | username | string | ✅ | 3-64字符 |
 | email | string | ✅ | 邮箱 |
 | password | string | ✅ | 6-128字符 |
-| display_name | string | ❌ | 显示名 |
+| display_name | string | ❌ | 显示名，默认同 username |
 | role | string | ❌ | 角色 (admin/viewer，默认viewer) |
 | status | string | ❌ | 状态 (默认active) |
 | language | string | ❌ | 默认 zh-CN |
@@ -457,25 +522,41 @@ Authorization: Bearer <access_token>
 
 **响应**：`UserResponse` (201)
 
+**错误码**：`400` — 用户名或邮箱已存在
+
 #### GET `/users/{user_id}` 👑
 
 获取指定用户详情。
 
+**路径参数**：`user_id` (int)
+
 **响应**：`UserResponse`
+
+**错误码**：`404` — 用户不存在
 
 #### PUT `/users/{user_id}` 👑
 
 更新指定用户信息。
 
-**请求体**：`UserUpdate`（同上，字段均可选）
+**路径参数**：`user_id` (int)
+
+**请求体**：`UserUpdate`（所有字段可选，同上）
 
 **响应**：`UserResponse`
+
+**错误码**：`404` — 用户不存在
 
 #### DELETE `/users/{user_id}` 👑
 
 删除用户。不能删除自己。
 
+**路径参数**：`user_id` (int)
+
 **响应**：`{"message": "User deleted"}`
+
+**错误码**：
+- `400` — 不能删除自己
+- `404` — 用户不存在
 
 ---
 
@@ -489,6 +570,19 @@ Authorization: Bearer <access_token>
 
 **响应**：`list[TeamResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "name": "运维团队",
+    "description": "负责生产环境运维",
+    "avatar_url": null,
+    "is_active": true,
+    "created_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
+
 #### POST `/teams` 🔑
 
 创建团队。创建者自动成为 Owner。
@@ -497,7 +591,7 @@ Authorization: Bearer <access_token>
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| name | string | ✅ | 团队名 |
+| name | string | ✅ | 团队名 (1-128字符) |
 | description | string | ❌ | 描述 |
 
 **响应**：`TeamResponse` (201)
@@ -506,7 +600,11 @@ Authorization: Bearer <access_token>
 
 获取团队详情。非成员返回 403。
 
+**路径参数**：`team_id` (int)
+
 **响应**：`TeamResponse`
+
+**错误码**：`403` — 非团队成员, `404` — 团队不存在
 
 #### PUT `/teams/{team_id}` 🔑
 
@@ -516,7 +614,7 @@ Authorization: Bearer <access_token>
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| name | string | ❌ | 团队名 |
+| name | string | ❌ | 团队名 (1-128字符) |
 | description | string | ❌ | 描述 |
 
 **响应**：`TeamResponse`
@@ -533,6 +631,21 @@ Authorization: Bearer <access_token>
 
 **响应**：`list[TeamMemberResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "team_id": 1,
+    "user_id": 1,
+    "role": "owner",
+    "joined_at": "2026-05-17T00:00:00+00:00",
+    "username": "admin",
+    "display_name": "Super Admin",
+    "email": "admin@cloudpivot.localhost"
+  }
+]
+```
+
 #### POST `/teams/{team_id}/members` 🔑
 
 添加团队成员。
@@ -542,9 +655,13 @@ Authorization: Bearer <access_token>
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | user_id | int | ✅ | 用户 ID |
-| role | string | ✅ | 角色 (owner/admin/member/viewer) |
+| role | string | ❌ | 角色 (owner/admin/member/viewer，默认viewer) |
 
 **响应**：`TeamMemberResponse` (201)
+
+**错误码**：
+- `400` — 用户已是成员
+- `404` — 用户不存在
 
 #### PUT `/teams/{team_id}/members/{user_id}` 🔑
 
@@ -554,15 +671,21 @@ Authorization: Bearer <access_token>
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| role | string | ✅ | 新角色 |
+| role | string | ✅ | 新角色 (owner/admin/member/viewer) |
 
 **响应**：`TeamMemberResponse`
+
+**错误码**：`404` — 成员不存在
 
 #### DELETE `/teams/{team_id}/members/{user_id}` 🔑
 
 移除团队成员。不能移除 Owner。
 
 **响应**：`{"message": "Member removed"}`
+
+**错误码**：
+- `400` — 不能移除 Owner
+- `404` — 成员不存在
 
 ---
 
@@ -580,14 +703,38 @@ Authorization: Bearer <access_token>
 | limit | int | 每页数量 (默认20) |
 | group_id | int | 按主机组筛选 |
 | status | string | 按状态筛选 (online/offline/unknown) |
-| keyword | string | 搜索关键词 (匹配名称/IP/主机名/OS) |
+| keyword | string | 搜索关键词 (匹配名称/IP/主机名/OS/公网IP) |
 
 **响应**：
 
 ```json
 {
   "total": 100,
-  "items": [HostResponse]
+  "items": [
+    {
+      "id": 1,
+      "name": "web-server-01",
+      "hostname": "web01",
+      "ip_address": "192.168.1.10",
+      "port": 22,
+      "auth_type": "password",
+      "username": "root",
+      "status": "online",
+      "os_info": "Ubuntu 22.04",
+      "os_name": "Ubuntu",
+      "os_version": "22.04",
+      "public_ip": "1.2.3.4",
+      "description": "Web 前端服务器",
+      "team_id": null,
+      "group_id": 1,
+      "tags": [
+        {"id": 1, "name": "生产环境", "color": "#e02424"}
+      ],
+      "last_connected_at": "2026-05-17T04:30:00+00:00",
+      "created_at": "2026-05-17T00:00:00+00:00",
+      "updated_at": "2026-05-17T04:30:00+00:00"
+    }
+  ]
 }
 ```
 
@@ -605,8 +752,8 @@ Authorization: Bearer <access_token>
 | port | int | ❌ | SSH 端口 (默认22) |
 | auth_type | string | ❌ | 认证方式 (password/key，默认password) |
 | username | string | ✅ | SSH 用户名 |
-| password | string | ❌ | SSH 密码 (password 认证) |
-| private_key | string | ❌ | SSH 私钥 (key 认证) |
+| password | string | ❌ | SSH 密码 (password 认证时使用) |
+| private_key | string | ❌ | SSH 私钥 (key 认证时使用) |
 | description | string | ❌ | 描述 |
 | public_ip | string | ❌ | 公网 IP |
 | os_name | string | ❌ | 系统名 |
@@ -619,13 +766,29 @@ Authorization: Bearer <access_token>
 
 #### POST `/hosts/batch-import` 👑
 
-批量导入主机。
+批量导入主机（仅管理员）。
 
 **请求体**：
 
 ```json
 {
-  "hosts": [HostCreate, HostCreate, ...]
+  "hosts": [
+    {
+      "name": "server-01",
+      "hostname": "srv01",
+      "ip_address": "192.168.1.10",
+      "username": "root",
+      "password": "secret"
+    },
+    {
+      "name": "server-02",
+      "hostname": "srv02",
+      "ip_address": "192.168.1.11",
+      "username": "root",
+      "auth_type": "key",
+      "private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n..."
+    }
+  ]
 }
 ```
 
@@ -633,8 +796,8 @@ Authorization: Bearer <access_token>
 
 ```json
 {
-  "message": "Imported 3 hosts",
-  "hosts": ["host1", "host2", "host3"]
+  "message": "Imported 2 hosts",
+  "hosts": ["server-01", "server-02"]
 }
 ```
 
@@ -642,11 +805,17 @@ Authorization: Bearer <access_token>
 
 获取主机详情。
 
+**路径参数**：`host_id` (int)
+
 **响应**：`HostResponse`
+
+**错误码**：`404` — 主机不存在
 
 #### GET `/hosts/{host_id}/metrics` 🔑
 
 获取主机监控图表数据。
+
+**路径参数**：`host_id` (int)
 
 **查询参数**：`hours` (默认24，取最近 N 小时的监控数据)
 
@@ -674,15 +843,19 @@ Authorization: Bearer <access_token>
 
 **响应**：`HostResponse`
 
+**错误码**：`404` — 主机不存在
+
 #### DELETE `/hosts/{host_id}` 🔑
 
 删除主机。
 
 **响应**：`{"message": "Host deleted"}`
 
+**错误码**：`404` — 主机不存在
+
 #### POST `/hosts/{host_id}/test` 🔑
 
-测试主机 SSH 连通性。成功时自动获取公网 IP、OS 信息。
+测试主机 SSH 连通性。成功时自动获取公网 IP、OS 信息并更新主机记录。
 
 **响应** (`ConnectivityTestResult`)：
 
@@ -695,11 +868,35 @@ Authorization: Bearer <access_token>
 }
 ```
 
+**失败响应**：
+
+```json
+{
+  "host_id": 1,
+  "success": false,
+  "message": "Connection refused",
+  "latency_ms": null
+}
+```
+
 #### GET `/hosts/groups/list` 🔑
 
 获取主机组列表（含每组主机数量）。
 
 **响应**：`list[HostGroupResponse]`
+
+```json
+[
+  {
+    "id": 1,
+    "name": "生产环境",
+    "description": "生产环境服务器组",
+    "parent_id": null,
+    "host_count": 5,
+    "created_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
 
 #### POST `/hosts/groups` 🔑
 
@@ -709,9 +906,9 @@ Authorization: Bearer <access_token>
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| name | string | ✅ | 组名 |
+| name | string | ✅ | 组名 (1-128) |
 | description | string | ❌ | 描述 |
-| parent_id | int | ❌ | 父组 ID |
+| parent_id | int | ❌ | 父组 ID（支持嵌套分组） |
 
 **响应**：`HostGroupResponse` (201)
 
@@ -721,6 +918,17 @@ Authorization: Bearer <access_token>
 
 **响应**：`list[HostTagResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "name": "生产环境",
+    "color": "#e02424",
+    "created_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
+
 #### POST `/hosts/tags` 🔑
 
 创建标签。
@@ -729,7 +937,7 @@ Authorization: Bearer <access_token>
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| name | string | ✅ | 标签名 |
+| name | string | ✅ | 标签名 (1-64) |
 | color | string | ❌ | 颜色 (默认 #1890ff) |
 
 **响应**：`HostTagResponse` (201)
@@ -743,6 +951,10 @@ Authorization: Bearer <access_token>
 WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **连接方式**：`ws://localhost:8000/api/v1/ws/ssh/{host_id}?token=<access_token>`
+
+**路径参数**：`host_id` (int)
+
+**查询参数**：`token` (必填，Access Token)
 
 **消息格式**（客户端 → 服务端）：
 
@@ -772,16 +984,27 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 // SSH 输出 — 直接发送纯文本/二进制数据
 ```
 
+**权限级别与命令控制**：
+
+| 权限级别 | 允许的操作 |
+|----------|-----------|
+| `readonly` | 仅允许查看命令（cat, ls, pwd, whoami, df, free, top, ps 等） |
+| `read_execute` | 允许执行命令（受风险检测约束） |
+| `read_write` | 完全读写权限 |
+| `full` | 完全权限 |
+
+> 当 `can_execute=false` 时，非安全命令将被拦截；当 `can_upload=false` 时，scp/rsync/rz/sz/sftp 命令将被拦截。
+
 **风险命令等级**：
-- `danger` — 拦截：`rm -rf /`, `mkfs`, `dd if=`, `shutdown`, `reboot` 等
-- `warning` — 警告：`rm -rf`, `kill -9`, `iptables -F`, `systemctl stop` 等
+- `danger` — 拦截：`rm -rf /`, `mkfs`, `dd if=`, `shutdown`, `reboot`, `init 0/6`, `chmod -R 777 /` 等
+- `warning` — 警告：`rm -rf`, `kill -9`, `iptables -F`, `systemctl stop/disable`, `userdel` 等
 - `safe` — 安全
 
 **关闭码**：
 - `4001` — 认证失败
 - `4003` — 用户不存在或已禁用
 - `4004` — 主机不存在
-- `4005` — 会话数达到上限
+- `4005` — 会话数达到上限（默认5）
 - `4006` — SSH 连接失败
 
 #### GET `/sessions` 🔑
@@ -790,19 +1013,33 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **查询参数**：`skip` (默认0), `limit` (默认20)
 
+**响应**：SSH 会话列表
+
 #### GET `/sessions/{session_id}/commands` 🔑
 
 获取会话命令记录。
 
+**路径参数**：`session_id` (int，数据库 ID)
+
 **查询参数**：`skip` (默认0), `limit` (默认100)
+
+**响应**：命令记录列表
 
 #### GET `/sessions/{session_id}/recording` 🔑
 
 获取会话录屏记录。
 
+**路径参数**：`session_id` (int，数据库 ID)
+
+**响应**：录屏记录对象
+
+**错误码**：`404` — 录屏不存在
+
 #### GET `/active-sessions` 🔑
 
 获取当前活跃的 SSH 会话列表。
+
+**响应**：活跃会话列表
 
 ---
 
@@ -812,38 +1049,77 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 获取权限列表，支持按 host_id / team_id / user_id 筛选。普通用户仅查看所属团队的权限。
 
-**查询参数**：`host_id`, `team_id`, `user_id`
+**查询参数**：`host_id` (int), `team_id` (int), `user_id` (int)
 
 **响应**：`list[HostPermissionResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "host_id": 1,
+    "team_id": 1,
+    "user_id": null,
+    "permission_level": "read_execute",
+    "can_upload": false,
+    "can_download": true,
+    "can_execute": true,
+    "allowed_time_start": "09:00",
+    "allowed_time_end": "18:00",
+    "allowed_days": "1,2,3,4,5",
+    "is_active": true,
+    "created_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
+
 #### POST `/permissions` 🔑
 
-创建主机权限。必须指定 `team_id` 或 `user_id`。
+创建主机权限。必须指定 `team_id` 或 `user_id`（至少一个）。
 
 **请求体** (`HostPermissionCreate`)：
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | host_id | int | ✅ | 主机 ID |
-| team_id | int | ❌ | 团队 ID (与 user_id 二选一) |
-| user_id | int | ❌ | 用户 ID (与 team_id 二选一) |
+| team_id | int | ❌ | 团队 ID (与 user_id 至少填一个) |
+| user_id | int | ❌ | 用户 ID (与 team_id 至少填一个) |
 | permission_level | string | ❌ | 权限级别 (readonly/read_execute/read_write/full，默认read_execute) |
 | can_upload | bool | ❌ | 允许上传 (默认false) |
 | can_download | bool | ❌ | 允许下载 (默认false) |
 | can_execute | bool | ❌ | 允许执行 (默认true) |
 | allowed_time_start | string | ❌ | 允许时段开始 (如 "09:00") |
 | allowed_time_end | string | ❌ | 允许时段结束 (如 "18:00") |
-| allowed_days | string | ❌ | 允许星期 (如 "1,2,3,4,5") |
+| allowed_days | string | ❌ | 允许星期 (如 "1,2,3,4,5"，1=周一) |
 
 **响应**：`HostPermissionResponse` (201)
+
+**错误码**：
+- `400` — 必须指定 team_id 或 user_id
+- `404` — 主机不存在
 
 #### PUT `/permissions/{perm_id}` 🔑
 
 更新权限。
 
-**请求体**：`HostPermissionUpdate`（所有字段可选）
+**路径参数**：`perm_id` (int)
+
+**请求体** (`HostPermissionUpdate`，所有字段可选)：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| permission_level | string | ❌ | 权限级别 |
+| can_upload | bool | ❌ | 允许上传 |
+| can_download | bool | ❌ | 允许下载 |
+| can_execute | bool | ❌ | 允许执行 |
+| allowed_time_start | string | ❌ | 允许时段开始 |
+| allowed_time_end | string | ❌ | 允许时段结束 |
+| allowed_days | string | ❌ | 允许星期 |
+| is_active | bool | ❌ | 是否启用 |
 
 **响应**：`HostPermissionResponse`
+
+**错误码**：`404` — 权限不存在
 
 #### DELETE `/permissions/{perm_id}` 🔑
 
@@ -851,13 +1127,31 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **响应**：`{"message": "Permission deleted"}`
 
+**错误码**：`404` — 权限不存在
+
 #### GET `/permissions/temporary` 🔑
 
 获取临时授权列表（仅未撤销且未过期的）。
 
-**查询参数**：`user_id`
+**查询参数**：`user_id` (int，可选)
 
 **响应**：`list[TemporaryPermissionResponse]`
+
+```json
+[
+  {
+    "id": 1,
+    "host_id": 1,
+    "user_id": 2,
+    "granted_by": 1,
+    "permission_level": "read_execute",
+    "reason": "紧急运维需求",
+    "expires_at": "2026-05-18T00:00:00+00:00",
+    "is_revoked": false,
+    "created_at": "2026-05-17T05:00:00+00:00"
+  }
+]
+```
 
 #### POST `/permissions/temporary` 🔑
 
@@ -875,11 +1169,17 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **响应**：`TemporaryPermissionResponse` (201)
 
+**错误码**：`400` — 过期时间必须在将来
+
 #### POST `/permissions/temporary/{perm_id}/revoke` 🔑
 
 撤销临时授权。
 
+**路径参数**：`perm_id` (int)
+
 **响应**：`{"message": "Temporary permission revoked"}`
+
+**错误码**：`404` — 临时权限不存在
 
 ---
 
@@ -913,7 +1213,7 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
   ],
   "recent_audits": [
     {
-      "session_id": "uuid",
+      "session_id": "uuid-string",
       "username": "admin",
       "host_name": "web-server-01",
       "command": "ls -la",
@@ -932,6 +1232,21 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 }
 ```
 
+**字段说明**：
+
+| 字段 | 说明 |
+|------|------|
+| overview.total_hosts | 有权限的主机总数 |
+| overview.online_hosts | 在线主机数 |
+| overview.offline_hosts | 离线主机数 |
+| overview.active_sessions | 活跃 SSH 会话数 |
+| overview.total_users | 系统用户总数（仅管理员可见） |
+| overview.active_alerts | 待处理告警数 |
+| overview.risk_commands_today | 今日风险命令数 |
+| resource_usage | Top 10 主机资源使用率 |
+| recent_audits | 最近 10 条审计记录 |
+| recent_alerts | 最近 10 条告警记录 |
+
 ---
 
 ### 8. 主机监控模块 (`/monitor`)
@@ -940,13 +1255,39 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 获取主机监控指标（时间序列）。
 
+**路径参数**：`host_id` (int)
+
 **查询参数**：`hours` (默认1，最近 N 小时)
 
 **响应**：`list[HostMetricResponse]`
 
+```json
+[
+  {
+    "id": 100,
+    "host_id": 1,
+    "cpu_percent": 45.2,
+    "memory_percent": 68.1,
+    "memory_used_gb": 10.9,
+    "memory_total_gb": 16.0,
+    "disk_percent": 52.0,
+    "disk_used_gb": 104.0,
+    "disk_total_gb": 200.0,
+    "network_in_kbps": 1024.5,
+    "network_out_kbps": 512.3,
+    "load_1min": 1.25,
+    "load_5min": 1.10,
+    "load_15min": 0.95,
+    "collected_at": "2026-05-17T05:00:00+00:00"
+  }
+]
+```
+
 #### GET `/monitor/metrics/{host_id}/latest` 🔑
 
 获取主机最新一条监控指标。
+
+**路径参数**：`host_id` (int)
 
 **响应**：`HostMetricResponse | null`
 
@@ -979,13 +1320,36 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **响应**：`AlertRuleResponse` (201)
 
+```json
+{
+  "id": 1,
+  "name": "CPU 过高告警",
+  "description": "CPU 使用率超过 90%",
+  "metric_type": "cpu_percent",
+  "condition": "gt",
+  "threshold": 90.0,
+  "duration_seconds": 0,
+  "severity": "warning",
+  "host_id": null,
+  "team_id": null,
+  "notify_channels": ["email"],
+  "webhook_url": null,
+  "is_enabled": true,
+  "created_at": "2026-05-17T00:00:00+00:00"
+}
+```
+
 #### PUT `/monitor/alert-rules/{rule_id}` 🔑
 
 更新告警规则。
 
+**路径参数**：`rule_id` (int)
+
 **请求体**：同 `AlertRuleCreate`
 
 **响应**：`AlertRuleResponse`
+
+**错误码**：`404` — 规则不存在
 
 #### DELETE `/monitor/alert-rules/{rule_id}` 🔑
 
@@ -993,29 +1357,54 @@ WebSSH 终端连接。通过 WebSocket 建立 SSH 交互通道。
 
 **响应**：`{"message": "Alert rule deleted"}`
 
+**错误码**：`404` — 规则不存在
+
 #### GET `/monitor/alerts` 🔑
 
 获取告警记录列表。
 
-**查询参数**：`severity`, `status`, `skip` (默认0), `limit` (默认20)
+**查询参数**：`severity` (info/warning/critical), `status` (pending/acknowledged/resolved), `skip` (默认0), `limit` (默认20)
 
 **响应**：`list[AlertRecordResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "rule_id": 1,
+    "host_id": 1,
+    "severity": "warning",
+    "status": "pending",
+    "title": "CPU 过高告警 - cpu_percent gt 90",
+    "message": "Current value: 95.2",
+    "notified_channels": ["email"],
+    "acknowledged_by": null,
+    "acknowledged_at": null,
+    "resolved_at": null,
+    "created_at": "2026-05-17T04:30:00+00:00"
+  }
+]
+```
+
 #### POST `/monitor/alerts/{alert_id}/acknowledge` 🔑
 
-确认告警。
+确认告警。将状态从 `pending` 变更为 `acknowledged`。
 
 **响应**：`{"message": "Alert acknowledged"}`
 
+**错误码**：`404` — 告警不存在
+
 #### POST `/monitor/alerts/{alert_id}/resolve` 🔑
 
-解决告警。
+解决告警。将状态变更为 `resolved`。
 
 **响应**：`{"message": "Alert resolved"}`
 
+**错误码**：`404` — 告警不存在
+
 #### POST `/monitor/agent/report` 🔓
 
-Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
+Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。上报后自动检查告警规则并触发通知。
 
 **请求体**：
 
@@ -1040,7 +1429,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 **响应**：`{"status": "ok"}`
 
-> 上报数据后自动检查告警规则并触发通知。
+**错误码**：`400` — host_id 必填
 
 ---
 
@@ -1052,11 +1441,36 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 **响应**：`list[DockerHostResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "name": "本地 Docker",
+    "host": "unix:///var/run/docker.sock",
+    "host_id": null,
+    "team_id": null,
+    "tls_verify": false,
+    "is_active": true,
+    "version_info": {"ApiVersion": "1.43"},
+    "created_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
+
 #### POST `/docker/hosts` 🔑
 
 添加 Docker 主机。
 
-**请求体** (`DockerHostCreate`)：包含 name, host_url, description 等
+**请求体** (`DockerHostCreate`)：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| name | string | ✅ | 主机名称 |
+| host | string | ✅ | Docker 连接地址 (如 unix:///var/run/docker.sock 或 tcp://192.168.1.10:2376) |
+| host_id | int | ❌ | 关联的 SSH 主机 ID |
+| team_id | int | ❌ | 所属团队 ID |
+| tls_verify | bool | ❌ | 是否验证 TLS (默认false) |
+| cert_path | string | ❌ | TLS 证书路径 |
 
 **响应**：`DockerHostResponse` (201)
 
@@ -1064,19 +1478,42 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 删除 Docker 主机。
 
+**路径参数**：`host_id` (int)
+
 **响应**：`{"message": "Docker host deleted"}`
+
+**错误码**：`404` — Docker 主机不存在
 
 #### GET `/docker/containers` 🔑
 
 获取容器列表。
 
-**查询参数**：`all` (默认false，是否包含已停止的容器)
+**查询参数**：`all` (默认false，true 时包含已停止的容器)
 
 **响应**：`list[ContainerResponse]`
+
+```json
+[
+  {
+    "id": "a1b2c3d4e5f6",
+    "name": "nginx",
+    "image": "nginx:latest",
+    "status": "Up 2 hours",
+    "state": "running",
+    "ports": [{"PublicPort": 80, "PrivatePort": 80, "Type": "tcp"}],
+    "labels": {"maintainer": "NGINX Docker Maintainers"},
+    "created": 1715923200
+  }
+]
+```
 
 #### GET `/docker/containers/{container_id}` 🔑
 
 获取容器详情。
+
+**路径参数**：`container_id` (string，容器 ID 或名称)
+
+**响应**：容器详细信息
 
 #### POST `/docker/containers/{container_id}/start` 🔑
 
@@ -1090,9 +1527,9 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 **请求体** (可选)：
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| timeout | int | 停止超时时间 |
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| timeout | int | ❌ | 停止超时秒数 (默认10) |
 
 **响应**：`{"message": "Container xxx stopped"}`
 
@@ -1100,7 +1537,11 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 重启容器。
 
-**请求体** (可选)：同 stop
+**请求体** (可选)：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| timeout | int | ❌ | 重启超时秒数 (默认10) |
 
 **响应**：`{"message": "Container xxx restarted"}`
 
@@ -1108,7 +1549,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 删除容器。
 
-**查询参数**：`force` (默认false)
+**查询参数**：`force` (默认false，是否强制删除)
 
 **响应**：`{"message": "Container xxx removed"}`
 
@@ -1128,7 +1569,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 #### GET `/docker/containers/{container_id}/stats` 🔑
 
-获取容器资源使用统计。
+获取容器资源使用统计（实时采样）。
 
 **响应** (`ContainerStatsResponse`)：
 
@@ -1138,6 +1579,10 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
   "memory_usage_mb": 128.5,
   "memory_limit_mb": 1024.0,
   "memory_percent": 12.55,
+  "network_in_bytes": null,
+  "network_out_bytes": null,
+  "block_read_bytes": null,
+  "block_write_bytes": null,
   "pids": 12
 }
 ```
@@ -1151,7 +1596,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | command | string | ✅ | 执行命令 |
-| tty | bool | ❌ | 是否分配 TTY |
+| tty | bool | ❌ | 是否分配 TTY (默认true) |
 
 **响应**：
 
@@ -1168,19 +1613,35 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 **响应**：`list[ImageResponse]`
 
+```json
+[
+  {
+    "id": "sha256:a1b2c3d4...",
+    "repo_tags": ["nginx:latest", "nginx:1.25"],
+    "size_mb": 187.64,
+    "created": 1715923200
+  }
+]
+```
+
 #### POST `/docker/images/pull` 🔑
 
 拉取镜像。
 
-**查询参数**：`repository` (必填), `tag` (默认latest)
+**查询参数**：
 
-**响应**：`{"message": "Image xxx:latest pulled"}`
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| repository | string | ✅ | 镜像仓库名 (如 nginx) |
+| tag | string | ❌ | 标签 (默认latest) |
+
+**响应**：`{"message": "Image nginx:latest pulled"}`
 
 #### DELETE `/docker/images/{image_id}` 🔑
 
 删除镜像。
 
-**查询参数**：`force` (默认false)
+**查询参数**：`force` (默认false，是否强制删除)
 
 **响应**：`{"message": "Image xxx removed"}`
 
@@ -1192,8 +1653,16 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 ```json
 {
-  "info": { ... },
-  "version": { ... }
+  "info": {
+    "Containers": 5,
+    "Images": 10,
+    "ServerVersion": "24.0.7",
+    "OperatingSystem": "Ubuntu 22.04"
+  },
+  "version": {
+    "Version": "24.0.7",
+    "ApiVersion": "1.43"
+  }
 }
 ```
 
@@ -1221,7 +1690,19 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 ```json
 {
   "total": 100,
-  "items": [...]
+  "items": [
+    {
+      "id": 1,
+      "session_id": "uuid-string",
+      "user_id": 1,
+      "host_id": 1,
+      "client_ip": "192.168.1.100",
+      "status": "closed",
+      "started_at": "2026-05-17T04:00:00+00:00",
+      "ended_at": "2026-05-17T04:30:00+00:00",
+      "duration_seconds": 1800
+    }
+  ]
 }
 ```
 
@@ -1236,7 +1717,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 | skip | int | 偏移量 (默认0) |
 | limit | int | 每页数量 (默认50) |
 | risk_level | string | 按风险等级筛选 (safe/warning/danger) |
-| session_id | int | 按会话筛选 |
+| session_id | int | 按会话 ID 筛选 |
 | keyword | string | 搜索命令关键词 |
 
 **响应**：
@@ -1244,22 +1725,44 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 ```json
 {
   "total": 500,
-  "items": [...]
+  "items": [
+    {
+      "id": 1,
+      "session_id": 10,
+      "command": "ls -la",
+      "risk_level": "safe",
+      "is_blocked": false,
+      "output_snippet": null,
+      "executed_at": "2026-05-17T04:10:00+00:00"
+    }
+  ]
 }
 ```
 
 #### GET `/audit/login-logs` 🔑
 
-获取登录日志。管理员查看全部，普通用户仅查看自己的。
+获取平台登录日志。管理员查看全部，普通用户仅查看自己的。
 
-**查询参数**：`skip` (默认0), `limit` (默认50), `user_id`, `keyword`
+**查询参数**：`skip` (默认0), `limit` (默认50), `user_id` (int), `keyword` (匹配用户名/IP)
 
 **响应**：
 
 ```json
 {
   "total": 200,
-  "items": [...]
+  "items": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "username": "admin",
+      "login_ip": "192.168.1.100",
+      "user_agent": "Mozilla/5.0...",
+      "login_method": "password",
+      "is_success": true,
+      "fail_reason": null,
+      "login_at": "2026-05-17T04:30:00+00:00"
+    }
+  ]
 }
 ```
 
@@ -1267,7 +1770,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 获取风险命令列表（仅 warning 和 danger 级别）。
 
-**查询参数**：`skip` (默认0), `limit` (默认50), `keyword`
+**查询参数**：`skip` (默认0), `limit` (默认50), `keyword` (搜索命令)
 
 **响应**：
 
@@ -1280,14 +1783,14 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 #### GET `/audit/export/commands` 🔑
 
-导出命令审计数据。
+导出命令审计数据。最多导出 10000 条记录。
 
 **查询参数**：
 
 | 参数 | 类型 | 说明 |
 |------|------|------|
 | format | string | 导出格式 (json/csv，默认json) |
-| risk_level | string | 按风险等级筛选 |
+| risk_level | string | 按风险等级筛选 (safe/warning/danger) |
 
 **响应 (json)**：
 
@@ -1318,6 +1821,8 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 }
 ```
 
+**错误码**：`400` — 不支持的格式，仅支持 json 或 csv
+
 #### GET `/audit/ssh-login-logs` 🔑
 
 获取 SSH 登录日志（通过后台采集远程主机 `/var/log/auth.log` 等）。
@@ -1328,7 +1833,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 |------|------|------|
 | host_id | int | 按主机筛选 |
 | user_id | int | 按用户筛选 |
-| risk_level | string | 按风险等级筛选 |
+| risk_level | string | 按风险等级筛选 (safe/warning/danger) |
 | is_success | bool | 按是否成功筛选 |
 | keyword | string | 搜索 (匹配用户名/IP/主机名) |
 | hours | int | 时间范围 (默认24小时) |
@@ -1347,11 +1852,17 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
       "host_name": "web-server-01",
       "username": "root",
       "login_ip": "192.168.1.100",
-      "login_at": "2026-05-17T04:30:00+00:00",
+      "login_port": 22,
+      "auth_method": "password",
       "is_success": true,
+      "fail_reason": null,
+      "login_at": "2026-05-17T04:30:00+00:00",
+      "logout_at": null,
+      "duration_seconds": null,
       "risk_level": "safe",
+      "is_new_ip": false,
       "is_brute_force": false,
-      "is_new_ip": false
+      "geo_location": null
     }
   ]
 }
@@ -1361,7 +1872,7 @@ Agent 上报监控数据（内部接口，供 cloudpivot-agent 调用）。
 
 SSH 登录日志统计分析。
 
-**查询参数**：`host_id`, `hours` (默认24)
+**查询参数**：`host_id` (int，可选), `hours` (默认24)
 
 **响应** (`SSHLoginAnalysisSummary`)：
 
@@ -1394,7 +1905,7 @@ SSH 登录日志统计分析。
 
 手动触发 SSH 登录日志采集（仅管理员）。
 
-**查询参数**：`host_id` (可选，不传则采集所有主机)
+**查询参数**：`host_id` (int，可选，不传则采集所有主机)
 
 **响应**：
 
@@ -1409,11 +1920,13 @@ SSH 登录日志统计分析。
 
 ### 11. SFTP 文件管理模块 (`/sftp`)
 
-所有 SFTP 操作基于已注册的主机 SSH 连接。
+所有 SFTP 操作基于已注册主机的 SSH 连接，每次操作建立临时连接后关闭。
 
 #### GET `/sftp/{host_id}/list` 🔑
 
-列出远程目录文件。
+列出远程目录文件。目录在前，文件在后，按名称排序。
+
+**路径参数**：`host_id` (int)
 
 **查询参数**：`path` (默认"/")
 
@@ -1424,11 +1937,23 @@ SSH 登录日志统计分析。
   "path": "/home",
   "files": [
     {
+      "name": "..",
+      "path": "/home/..",
+      "is_dir": true,
+      "size": 4096,
+      "permissions": "drwxr-xr-x",
+      "owner": "",
+      "group": "",
+      "modified_at": "2026-05-17T04:30:00"
+    },
+    {
       "name": "user",
       "path": "/home/user",
       "is_dir": true,
       "size": 4096,
       "permissions": "drwxr-xr-x",
+      "owner": "",
+      "group": "",
       "modified_at": "2026-05-17T04:30:00"
     },
     {
@@ -1437,6 +1962,8 @@ SSH 登录日志统计分析。
       "is_dir": false,
       "size": 1024,
       "permissions": "-rw-r--r--",
+      "owner": "",
+      "group": "",
       "modified_at": "2026-05-17T04:30:00"
     }
   ]
@@ -1484,11 +2011,13 @@ SSH 登录日志统计分析。
 
 #### POST `/sftp/{host_id}/copy` 🔑
 
-复制文件/文件夹。
+复制文件/文件夹（使用 `cp -r`，支持递归复制目录）。
 
 **请求体**：同 Move
 
 **响应**：`{"success": true, "source": "...", "target": "..."}`
+
+**错误码**：`400` — 复制失败
 
 #### POST `/sftp/{host_id}/delete` 🔑
 
@@ -1506,9 +2035,13 @@ SSH 登录日志统计分析。
 
 下载文件（流式响应）。不支持下载目录。
 
-**查询参数**：`path` (必填)
+**查询参数**：`path` (必填，文件路径)
 
-**响应**：文件流 (application/octet-stream)
+**响应**：文件流 (application/octet-stream)，包含 `Content-Disposition` 和 `Content-Length` 头
+
+**错误码**：
+- `400` — 不能下载目录
+- `404` — 文件不存在
 
 #### POST `/sftp/{host_id}/upload` 🔑
 
@@ -1516,7 +2049,7 @@ SSH 登录日志统计分析。
 
 **查询参数**：`path` (默认"/"，目标目录)
 
-**请求体**：`files` (multipart 文件列表)
+**请求体**：`files` (multipart 文件列表，支持多文件上传)
 
 **响应** (`UploadResponse`)：
 
@@ -1551,7 +2084,7 @@ SSH 登录日志统计分析。
 
 #### GET `/site-config/registration-status` 🔓
 
-获取注册开放状态（公开接口）。
+获取注册开放状态（公开接口，前端注册页使用）。
 
 **响应**：
 
@@ -1567,9 +2100,23 @@ SSH 登录日志统计分析。
 
 **响应**：`list[SiteConfigResponse]`
 
+```json
+[
+  {
+    "id": 1,
+    "key": "allow_register",
+    "value": "true",
+    "description": "Whether open registration is allowed",
+    "updated_at": "2026-05-17T00:00:00+00:00"
+  }
+]
+```
+
 #### PUT `/site-config/{key}` 👑
 
 更新单个站点配置。
+
+**路径参数**：`key` (string，配置键名)
 
 **请求体**：
 
@@ -1580,16 +2127,17 @@ SSH 登录日志统计分析。
 
 **响应**：`SiteConfigResponse`
 
+**错误码**：`404` — 配置键不存在
+
 #### POST `/site-config/batch` 👑
 
-批量更新站点配置。
+批量更新站点配置。若键不存在则自动创建。
 
 **请求体**：`list[SiteConfigItem]`
 
 ```json
 [
-  {"key": "allow_register", "value": "false", "description": "关闭注册"},
-  {"key": "site_name", "value": "My CloudPivot", "description": "站点名称"}
+  {"key": "allow_register", "value": "false", "description": "关闭注册"}
 ]
 ```
 
