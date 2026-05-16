@@ -176,6 +176,7 @@ alembic upgrade head
 
 首次运行后通过 `/api/v1/auth/register` 注册管理员账号。
 
+内置管理员账号：`admin` / `admin123`
 ## License
 
 MIT License
