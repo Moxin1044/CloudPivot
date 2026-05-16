@@ -176,3 +176,28 @@ export const dockerApi = {
 export const dashboardApi = {
   getOverview: () => request.get('/dashboard'),
 };
+
+// ===== SFTP API =====
+export const sftpApi = {
+  listFiles: (hostId: number, path: string = '/') =>
+    request.get(`/sftp/${hostId}/list`, { params: { path } }),
+  mkdir: (hostId: number, path: string, name: string) =>
+    request.post(`/sftp/${hostId}/mkdir`, { path, name }),
+  renameFile: (hostId: number, path: string, new_name: string) =>
+    request.post(`/sftp/${hostId}/rename`, { path, new_name }),
+  deleteFile: (hostId: number, path: string) =>
+    request.post(`/sftp/${hostId}/delete`, { path }),
+  moveFile: (hostId: number, sourcePath: string, targetPath: string) =>
+    request.post(`/sftp/${hostId}/move`, { source_path: sourcePath, target_path: targetPath }),
+  copyFile: (hostId: number, sourcePath: string, targetPath: string) =>
+    request.post(`/sftp/${hostId}/copy`, { source_path: sourcePath, target_path: targetPath }),
+  downloadFile: (hostId: number, path: string) =>
+    request.get(`/sftp/${hostId}/download`, { params: { path }, responseType: 'arraybuffer' }),
+  uploadFile: (hostId: number, path: string, formData: FormData) =>
+    request.post(`/sftp/${hostId}/upload`, formData, {
+      params: { path },
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  exists: (hostId: number, path: string) =>
+    request.get(`/sftp/${hostId}/exists`, { params: { path } }),
+};

@@ -23,6 +23,7 @@ from app.routers.monitor import router as monitor_router
 from app.routers.docker import router as docker_router
 from app.routers.audit import router as audit_router
 from app.routers.site_config import router as site_config_router
+from app.routers.sftp import router as sftp_router
 
 # Keep old auxiliary router
 from routers.auxiliary import auxiliary_router
@@ -150,6 +151,7 @@ app.include_router(monitor_router, prefix="/api/v1")
 app.include_router(docker_router, prefix="/api/v1")
 app.include_router(audit_router, prefix="/api/v1")
 app.include_router(site_config_router, prefix="/api/v1")
+app.include_router(sftp_router, prefix="/api/v1")
 
 
 # ===== Serve Frontend Static Files =====

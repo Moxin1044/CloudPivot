@@ -22,6 +22,10 @@
           <template #icon><t-icon name="root-list" /></template>
           {{ $t('menu.terminal') }}
         </t-menu-item>
+        <t-menu-item value="/sftp">
+          <template #icon><t-icon name="folder-open" /></template>
+          {{ $t('menu.sftp') }}
+        </t-menu-item>
         <t-menu-item value="/teams">
           <template #icon><t-icon name="usergroup" /></template>
           {{ $t('menu.teams') }}

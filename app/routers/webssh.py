@@ -226,7 +226,7 @@ async def websocket_ssh(
                                                 if not allowed:
                                                     blocked = True
                                                     # Send Ctrl+C to cancel the blocked command on SSH
-                                                    process.stdin.write("\x03")
+                                                    process.stdin.write(b"\x03")
                                                     await process.stdin.drain()
                                                     await websocket.send_json({
                                                         "type": "blocked",
@@ -254,20 +254,20 @@ async def websocket_ssh(
                                                 db.add(cmd_log)
                                                 await db.commit()
                                                 # Send enter to execute
-                                                process.stdin.write(char)
+                                                process.stdin.write(char.encode("utf-8"))
                                                 await process.stdin.drain()
                                         else:
-                                            process.stdin.write(char)
+                                            process.stdin.write(char.encode("utf-8"))
                                             await process.stdin.drain()
 
                                     elif char == "\x7f" or char == "\b":
                                         cmd_buffer = cmd_buffer[:-1]
-                                        process.stdin.write(char)
+                                        process.stdin.write(b"\x7f")
                                         await process.stdin.drain()
 
                                     elif char == "\x03":
                                         cmd_buffer = ""
-                                        process.stdin.write(char)
+                                        process.stdin.write(b"\x03")
                                         await process.stdin.drain()
 
                                     else:
@@ -275,7 +275,7 @@ async def websocket_ssh(
                                         # accumulate in buffer for permission check on enter
                                         if len(char) == 1 and char.isprintable():
                                             cmd_buffer += char
-                                        process.stdin.write(char)
+                                        process.stdin.write(char.encode("utf-8"))
                                         await process.stdin.drain()
 
                                 elif msg_type == "resize":
@@ -288,7 +288,7 @@ async def websocket_ssh(
 
                             except json.JSONDecodeError:
                                 # Non-JSON data: forward raw to SSH
-                                process.stdin.write(data)
+                                process.stdin.write(data.encode("utf-8"))
                                 await process.stdin.drain()
 
                     except WebSocketDisconnect:

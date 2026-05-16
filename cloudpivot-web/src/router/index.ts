@@ -38,6 +38,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'WebSSH', icon: 'root-list' },
       },
       {
+        path: 'sftp',
+        name: 'SFTP',
+        component: () => import('@/views/sftp/index.vue'),
+        meta: { title: 'SFTP', icon: 'folder-open' },
+      },
+      {
         path: 'teams',
         name: 'Teams',
         component: () => import('@/views/team/index.vue'),
