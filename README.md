@@ -4,6 +4,24 @@
 
 CloudPivot 是一个现代化、云原生、轻量级的 SSH 运维堡垒机平台，提供安全可靠的运维访问控制、会话审计、主机监控与 Docker 管理能力。
 
+![](attachments/image-20260517051044950.png)
+
+![](attachments/image-20260517051425649.png)
+
+![](attachments/image-20260517051113948.png)
+
+
+
+![](attachments/image-20260517051215097.png)
+
+![](attachments/image-20260517051234236.png)
+
+![](attachments/image-20260517051300013.png)
+
+![](attachments/image-20260517051324532.png)
+
+![](attachments/image-20260517051357515.png)
+
 ## 技术栈
 
 ### 后端
