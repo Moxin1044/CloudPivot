@@ -4028,3 +4028,15 @@ DETAIL:  Key (username)=(admin) already exists.
 2026-05-16 17:46:20 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
 2026-05-16 17:46:20 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
 2026-05-16 17:46:20 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
+2026-05-16 17:58:14 | INFO     | main:lifespan:78 - Starting CloudPivot in production mode
+2026-05-16 17:58:14 | INFO     | main:lifespan:78 - Starting CloudPivot in production mode
+2026-05-16 17:58:14 | INFO     | main:lifespan:78 - Starting CloudPivot in production mode
+2026-05-16 17:58:14 | INFO     | main:lifespan:78 - Starting CloudPivot in production mode
+2026-05-16 17:58:14 | INFO     | main:lifespan:84 - Database tables ensured
+2026-05-16 17:58:14 | INFO     | main:lifespan:84 - Database tables ensured
+2026-05-16 17:58:14 | INFO     | main:lifespan:84 - Database tables ensured
+2026-05-16 17:58:14 | INFO     | main:lifespan:84 - Database tables ensured
+2026-05-16 17:58:14 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
+2026-05-16 17:58:14 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
+2026-05-16 17:58:14 | INFO     | main:_ensure_default_admin:50 - Admin user already exists
+2026-05-16 17:58:14 | INFO     | main:_ensure_default_admin:50 - Admin user already exists

@@ -181,7 +181,10 @@ async def websocket_ssh(
                 # Read from SSH and forward to WebSocket
                 async def read_ssh():
                     try:
-                        async for data in process.stdout:
+                        while True:
+                            data = await process.stdout.read(4096)
+                            if not data:
+                                break
                             if isinstance(data, str):
                                 await websocket.send_text(data)
                             else:

@@ -143,9 +143,9 @@ async def test_ssh_connectivity(
             return False, "Unexpected response"
     except asyncssh.DisconnectError as e:
         return False, f"Disconnected: {e.reason}"
-    except asyncssh.ConnectionLostError:
+    except asyncssh.ConnectionLost:
         return False, "Connection lost"
-    except asyncssh.PermissionDeniedError:
+    except asyncssh.PermissionDenied:
         return False, "Authentication failed"
     except asyncio.TimeoutError:
         return False, "Connection timeout"
