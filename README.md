@@ -57,6 +57,8 @@ CloudPivot 是一个现代化、云原生、轻量级的 SSH 运维堡垒机平�
 
 ## 项目结构
 
+![设计思路](attachments/image-20260517052406716.png)
+
 ```
 CloudPivot-Server/
 ├── main.py                     # FastAPI 入口
