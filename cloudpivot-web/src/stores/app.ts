@@ -61,6 +61,7 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = null;
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userInfo');
   }
 
   return { token, refreshToken, userInfo, setTokens, setUser, logout };

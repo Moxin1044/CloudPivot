@@ -79,15 +79,34 @@
         </t-card>
       </t-col>
     </t-row>
+
+    <!-- System Settings (Admin Only) -->
+    <t-row v-if="isAdmin" :gutter="[16, 16]" style="margin-top: 16px">
+      <t-col :span="12">
+        <t-card :title="$t('settings.systemSettings')" :bordered="false">
+          <template #actions>
+            <t-button theme="primary" @click="onSaveSystemSettings" :loading="systemLoading">
+              {{ $t('common.save') }}
+            </t-button>
+          </template>
+          <t-form label-align="top" :label-width="160">
+            <t-form-item :label="$t('settings.allowRegister')">
+              <t-switch v-model="systemSettings.allow_register" />
+              <div class="form-tip">{{ $t('settings.allowRegisterTip') }}</div>
+            </t-form-item>
+          </t-form>
+        </t-card>
+      </t-col>
+    </t-row>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useAppStore, useUserStore } from '@/stores/app';
-import { authApi } from '@/api';
+import { authApi, siteConfigApi } from '@/api';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
@@ -95,6 +114,7 @@ const userStore = useUserStore();
 const pwdLoading = ref(false);
 const profileLoading = ref(false);
 const notifLoading = ref(false);
+const systemLoading = ref(false);
 
 const profileForm = reactive({ email: '', display_name: '' });
 const pwdForm = reactive({ old_password: '', new_password: '' });
@@ -104,6 +124,9 @@ const notifForm = reactive({
   dingtalk_webhook: '',
 });
 const notifChannels = ref<string[]>([]);
+const systemSettings = reactive({ allow_register: true });
+
+const isAdmin = computed(() => userStore.userInfo?.role === 'admin');
 
 function onThemeChange() {
   appStore.toggleTheme();
@@ -169,8 +192,31 @@ async function onSaveNotifications() {
   finally { notifLoading.value = false; }
 }
 
+async function loadSystemSettings() {
+  if (!isAdmin.value) return;
+  try {
+    const res: any = await siteConfigApi.list();
+    const allowRegister = res.find((c: any) => c.key === 'allow_register');
+    if (allowRegister) {
+      systemSettings.allow_register = allowRegister.value === 'true';
+    }
+  } catch (e) { /* handled */ }
+}
+
+async function onSaveSystemSettings() {
+  systemLoading.value = true;
+  try {
+    await siteConfigApi.update('allow_register', {
+      value: systemSettings.allow_register ? 'true' : 'false',
+    });
+    MessagePlugin.success(t('settings.saveSuccess'));
+  } catch (e) { /* handled */ }
+  finally { systemLoading.value = false; }
+}
+
 onMounted(() => {
   loadUserData();
+  loadSystemSettings();
 });
 </script>
 

@@ -79,6 +79,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/settings/index.vue'),
         meta: { title: '系统设置', icon: 'setting' },
       },
+      {
+        path: 'users',
+        name: 'Users',
+        component: () => import('@/views/user/index.vue'),
+        meta: { title: '用户管理', icon: 'user', adminOnly: true },
+      },
     ],
   },
 ];
@@ -92,9 +98,16 @@ router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token');
   if (!to.meta.noAuth && !token) {
     next({ name: 'Login' });
-  } else {
-    next();
+    return;
   }
+  if (to.meta.adminOnly) {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    if (userInfo.role !== 'admin') {
+      next({ path: '/' });
+      return;
+    }
+  }
+  next();
 });
 
 export default router;

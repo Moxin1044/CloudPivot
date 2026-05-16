@@ -50,6 +50,10 @@
           <template #icon><t-icon name="setting" /></template>
           {{ $t('menu.settings') }}
         </t-menu-item>
+        <t-menu-item v-if="isAdmin" value="/users">
+          <template #icon><t-icon name="user" /></template>
+          {{ $t('settings.userManagement') }}
+        </t-menu-item>
       </t-menu>
     </t-aside>
     <t-layout>
@@ -105,6 +109,7 @@ const currentMenuKey = computed(() => {
   const path = route.path.split('/')[1];
   return path || 'dashboard';
 });
+const isAdmin = computed(() => userStore.userInfo?.role === 'admin');
 
 const langOptions = [
   { content: '中文', value: 'zh-CN' },

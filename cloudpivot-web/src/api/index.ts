@@ -61,6 +61,13 @@ export const userApi = {
   delete: (id: number) => request.delete(`/users/${id}`),
 };
 
+export const siteConfigApi = {
+  list: () => request.get('/site-config'),
+  update: (key: string, data: any) => request.put(`/site-config/${key}`, data),
+  batchUpdate: (items: any[]) => request.post('/site-config/batch', items),
+  getRegistrationStatus: () => request.get('/site-config/registration-status'),
+};
+
 // ===== Hosts API =====
 export const hostApi = {
   list: (params?: any) => request.get('/hosts', { params }),

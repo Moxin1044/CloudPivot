@@ -4,6 +4,7 @@ from sqlalchemy import select, or_
 from app.database import get_db
 from app.models.user import User, UserRole, UserStatus
 from app.models.log import LoginLog
+from app.models.site_config import SiteConfig
 from app.schemas.user import (
     LoginRequest, RegisterRequest, TokenResponse,
     RefreshTokenRequest, UserResponse, UserCreate,
@@ -22,6 +23,11 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=UserResponse, summary="用户注册")
 async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(SiteConfig).where(SiteConfig.key == "allow_register"))
+    config = result.scalar_one_or_none()
+    if config and config.value == "false":
+        raise HTTPException(status_code=403, detail="Registration is currently disabled")
+
     result = await db.execute(
         select(User).where(or_(User.username == data.username, User.email == data.email))
     )
@@ -166,10 +172,26 @@ async def change_password(
 async def list_users(
     skip: int = 0,
     limit: int = 20,
+    role: str = None,
+    status: str = None,
+    search: str = None,
     current_user: User = Depends(get_current_active_admin),
     db: AsyncSession = Depends(get_db),
 ):
-    result = await db.execute(select(User).offset(skip).limit(limit))
+    query = select(User)
+    if role:
+        query = query.where(User.role == role)
+    if status:
+        query = query.where(User.status == status)
+    if search:
+        query = query.where(
+            or_(
+                User.username.ilike(f"%{search}%"),
+                User.email.ilike(f"%{search}%"),
+                User.display_name.ilike(f"%{search}%"),
+            )
+        )
+    result = await db.execute(query.offset(skip).limit(limit))
     return result.scalars().all()
 
 

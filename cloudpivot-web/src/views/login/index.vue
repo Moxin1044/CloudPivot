@@ -34,7 +34,7 @@
         </t-form-item>
       </t-form>
       <div class="login-footer">
-        <t-button variant="text" @click="showRegister = true">
+        <t-button v-if="allowRegister" variant="text" @click="showRegister = true">
           {{ $t('login.noAccount') }}{{ $t('login.register') }}
         </t-button>
       </div>
@@ -63,11 +63,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { authApi } from '@/api';
+import { authApi, siteConfigApi } from '@/api';
 import { useUserStore } from '@/stores/app';
 
 const { t } = useI18n();
@@ -76,6 +76,7 @@ const userStore = useUserStore();
 const loading = ref(false);
 const showRegister = ref(false);
 const registerLoading = ref(false);
+const allowRegister = ref(true);
 
 const formData = reactive({ username: '', password: '' });
 const registerData = reactive({ username: '', email: '', password: '' });
@@ -93,6 +94,7 @@ async function onSubmit({ validateResult }: any) {
     userStore.setTokens(res.access_token, res.refresh_token);
     const userInfo = await authApi.getMe();
     userStore.setUser(userInfo);
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
     MessagePlugin.success(t('login.loginSuccess'));
     router.push('/dashboard');
   } catch (e: any) {
@@ -114,6 +116,19 @@ async function onRegister() {
     registerLoading.value = false;
   }
 }
+
+async function loadRegistrationStatus() {
+  try {
+    const res: any = await siteConfigApi.getRegistrationStatus();
+    allowRegister.value = res.allow_register !== false;
+  } catch (e) {
+    allowRegister.value = true;
+  }
+}
+
+onMounted(() => {
+  loadRegistrationStatus();
+});
 </script>
 
 <style scoped>
