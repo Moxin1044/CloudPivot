@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, func, and_
+from sqlalchemy import select, desc, func, and_, cast, String
 from app.database import get_db
 from app.models.session import SSHSession, SessionCommand, SessionStatus, RiskLevel
 from app.models.log import LoginLog, OperationLog
 from app.models.user import User
 from app.models.ssh_login_log import SSHLoginLog
 from app.models.host import Host
-from app.schemas.session import SSHSessionResponse, SessionCommandResponse
-from app.schemas.ssh_login_log import SSHLoginLogResponse, SSHLoginAnalysisSummary
+from app.schemas.ssh_login_log import SSHLoginAnalysisSummary
 from app.dependencies import get_current_user
 from typing import Optional
 from datetime import datetime, timezone, timedelta
@@ -16,7 +15,23 @@ from datetime import datetime, timezone, timedelta
 router = APIRouter(prefix="/audit", tags=["Audit"])
 
 
-@router.get("/sessions", response_model=dict, summary="获取会话审计列表")
+def _to_dict_list(items):
+    """Helper to convert SQLAlchemy models to plain dicts for JSON serialization."""
+    result = []
+    for item in items:
+        d = {}
+        for col in item.__table__.columns:
+            val = getattr(item, col.name)
+            if val is not None and hasattr(val, 'isoformat'):
+                val = val.isoformat()
+            elif val is not None and hasattr(val, 'value'):
+                val = val.value
+            d[col.name] = val
+        result.append(d)
+    return result
+
+
+@router.get("/sessions", summary="获取会话审计列表")
 async def list_audit_sessions(
     skip: int = 0,
     limit: int = 20,
@@ -28,27 +43,34 @@ async def list_audit_sessions(
     db: AsyncSession = Depends(get_db),
 ):
     query = select(SSHSession).order_by(desc(SSHSession.started_at))
+    count_query = select(func.count()).select_from(SSHSession)
     if user_id:
         query = query.where(SSHSession.user_id == user_id)
+        count_query = count_query.where(SSHSession.user_id == user_id)
     if host_id:
         query = query.where(SSHSession.host_id == host_id)
+        count_query = count_query.where(SSHSession.host_id == host_id)
     if status:
         query = query.where(SSHSession.status == status)
+        count_query = count_query.where(SSHSession.status == status)
     if keyword:
-        query = query.where(
+        like_filter = (
             (SSHSession.session_id.ilike(f"%{keyword}%")) |
             (SSHSession.client_ip.ilike(f"%{keyword}%"))
         )
+        query = query.where(like_filter)
+        count_query = count_query.where(like_filter)
     if not current_user.is_admin:
         query = query.where(SSHSession.user_id == current_user.id)
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+        count_query = count_query.where(SSHSession.user_id == current_user.id)
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    return {"total": total, "items": _to_dict_list(items)}
 
 
-@router.get("/commands", response_model=dict, summary="获取命令审计列表")
+@router.get("/commands", summary="获取命令审计列表")
 async def list_audit_commands(
     skip: int = 0,
     limit: int = 50,
@@ -59,20 +81,24 @@ async def list_audit_commands(
     db: AsyncSession = Depends(get_db),
 ):
     query = select(SessionCommand).order_by(desc(SessionCommand.executed_at))
+    count_query = select(func.count()).select_from(SessionCommand)
     if risk_level:
         query = query.where(SessionCommand.risk_level == risk_level)
+        count_query = count_query.where(SessionCommand.risk_level == risk_level)
     if session_id:
         query = query.where(SessionCommand.session_id == session_id)
+        count_query = count_query.where(SessionCommand.session_id == session_id)
     if keyword:
         query = query.where(SessionCommand.command.ilike(f"%{keyword}%"))
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+        count_query = count_query.where(SessionCommand.command.ilike(f"%{keyword}%"))
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    return {"total": total, "items": _to_dict_list(items)}
 
 
-@router.get("/login-logs", response_model=dict, summary="获取登录日志")
+@router.get("/login-logs", summary="获取登录日志")
 async def list_login_logs(
     skip: int = 0,
     limit: int = 50,
@@ -82,23 +108,28 @@ async def list_login_logs(
     db: AsyncSession = Depends(get_db),
 ):
     query = select(LoginLog).order_by(desc(LoginLog.login_at))
+    count_query = select(func.count()).select_from(LoginLog)
     if user_id:
         query = query.where(LoginLog.user_id == user_id)
+        count_query = count_query.where(LoginLog.user_id == user_id)
     if keyword:
-        query = query.where(
+        like_filter = (
             (LoginLog.username.ilike(f"%{keyword}%")) |
             (LoginLog.login_ip.ilike(f"%{keyword}%"))
         )
+        query = query.where(like_filter)
+        count_query = count_query.where(like_filter)
     if not current_user.is_admin:
         query = query.where(LoginLog.user_id == current_user.id)
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+        count_query = count_query.where(LoginLog.user_id == current_user.id)
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    return {"total": total, "items": _to_dict_list(items)}
 
 
-@router.get("/risk-commands", response_model=dict, summary="获取风险命令列表")
+@router.get("/risk-commands", summary="获取风险命令列表")
 async def list_risk_commands(
     skip: int = 0,
     limit: int = 50,
@@ -106,16 +137,17 @@ async def list_risk_commands(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(SessionCommand).where(
-        SessionCommand.risk_level.in_([RiskLevel.warning, RiskLevel.danger])
-    ).order_by(desc(SessionCommand.executed_at))
+    base_filter = SessionCommand.risk_level.in_([RiskLevel.warning, RiskLevel.danger])
+    query = select(SessionCommand).where(base_filter).order_by(desc(SessionCommand.executed_at))
+    count_query = select(func.count()).select_from(SessionCommand).where(base_filter)
     if keyword:
         query = query.where(SessionCommand.command.ilike(f"%{keyword}%"))
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+        count_query = count_query.where(SessionCommand.command.ilike(f"%{keyword}%"))
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     items = result.scalars().all()
-    return {"total": total, "items": items}
+    return {"total": total, "items": _to_dict_list(items)}
 
 
 @router.get("/export/commands", summary="导出命令审计")
@@ -159,7 +191,7 @@ async def export_commands(
 
 
 # ===== SSH Login Log Analysis =====
-@router.get("/ssh-login-logs", response_model=dict, summary="获取SSH登录日志")
+@router.get("/ssh-login-logs", summary="获取SSH登录日志")
 async def list_ssh_login_logs(
     host_id: Optional[int] = None,
     user_id: Optional[int] = None,
@@ -173,34 +205,55 @@ async def list_ssh_login_logs(
     db: AsyncSession = Depends(get_db),
 ):
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
-    query = select(SSHLoginLog, Host.name.label("host_name")).join(
-        Host, SSHLoginLog.host_id == Host.id, isouter=True
-    ).where(SSHLoginLog.login_at >= since).order_by(desc(SSHLoginLog.login_at))
-
+    base_query = select(SSHLoginLog).where(SSHLoginLog.login_at >= since)
     if host_id:
-        query = query.where(SSHLoginLog.host_id == host_id)
+        base_query = base_query.where(SSHLoginLog.host_id == host_id)
     if risk_level:
-        query = query.where(SSHLoginLog.risk_level == risk_level)
+        base_query = base_query.where(SSHLoginLog.risk_level == risk_level)
     if is_success is not None:
-        query = query.where(SSHLoginLog.is_success == is_success)
+        base_query = base_query.where(SSHLoginLog.is_success == is_success)
     if keyword:
-        query = query.where(
-            (SSHLoginLog.username.ilike(f"%{keyword}%")) |
-            (SSHLoginLog.login_ip.ilike(f"%{keyword}%")) |
-            (Host.name.ilike(f"%{keyword}%"))
+        # keyword 过滤通过子查询实现，避免 join 后 count 出现笛卡尔积
+        host_ids_result = await db.execute(
+            select(Host.id).where(Host.name.ilike(f"%{keyword}%"))
         )
+        matched_host_ids = [r[0] for r in host_ids_result.all()]
+        kw_filter = (
+            (SSHLoginLog.username.ilike(f"%{keyword}%")) |
+            (SSHLoginLog.login_ip.ilike(f"%{keyword}%"))
+        )
+        if matched_host_ids:
+            kw_filter = kw_filter | SSHLoginLog.host_id.in_(matched_host_ids)
+        base_query = base_query.where(kw_filter)
     if not current_user.is_admin:
-        query = query.where(SSHLoginLog.username == current_user.username)
+        base_query = base_query.where(SSHLoginLog.username == current_user.username)
 
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
+
+    query = base_query.order_by(desc(SSHLoginLog.login_at))
     result = await db.execute(query.offset(skip).limit(limit))
-    rows = result.all()
+    items = result.scalars().all()
+
+    # 批量查询主机名
+    host_ids = {log.host_id for log in items if log.host_id}
+    host_map = {}
+    if host_ids:
+        host_res = await db.execute(select(Host.id, Host.name).where(Host.id.in_(host_ids)))
+        for hid, hname in host_res.all():
+            host_map[hid] = hname
 
     data = []
-    for log, host_name in rows:
-        log.host_name = host_name
-        data.append(log)
+    for log in items:
+        d = {}
+        for col in log.__table__.columns:
+            val = getattr(log, col.name)
+            if val is not None and hasattr(val, 'isoformat'):
+                val = val.isoformat()
+            d[col.name] = val
+        d["host_name"] = host_map.get(log.host_id)
+        data.append(d)
     return {"total": total, "items": data}
 
 
@@ -267,14 +320,14 @@ async def ssh_login_analysis(
     )
     top_users = [{"username": u, "count": cnt} for u, cnt in top_users_result.all() if u]
 
-    # Hourly trend
+    # Hourly trend (PostgreSQL compatible)
     hourly_result = await db.execute(
         select(
-            func.strftime("%Y-%m-%d %H:00", SSHLoginLog.login_at).label("hour"),
+            func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00').label("hour"),
             func.count().label("cnt"),
         )
         .where(SSHLoginLog.login_at >= since)
-        .group_by("hour")
+        .group_by(func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00'))
         .order_by("hour")
     )
     hourly_trend = [{"hour": h, "count": cnt} for h, cnt in hourly_result.all() if h]

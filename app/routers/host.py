@@ -58,7 +58,30 @@ async def list_hosts(
             HostPermission.is_active == True,
         )
 
-    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
+    # Count without options to avoid subquery issues
+    count_query = select(func.count()).select_from(Host)
+    if group_id is not None:
+        count_query = count_query.where(Host.group_id == group_id)
+    if status is not None:
+        count_query = count_query.where(Host.status == status)
+    if keyword:
+        count_query = count_query.where(
+            (Host.name.ilike(f"%{keyword}%")) |
+            (Host.ip_address.ilike(f"%{keyword}%")) |
+            (Host.hostname.ilike(f"%{keyword}%")) |
+            (Host.os_name.ilike(f"%{keyword}%")) |
+            (Host.public_ip.ilike(f"%{keyword}%"))
+        )
+    if not current_user.is_admin:
+        count_query = count_query.join(
+            HostPermission, HostPermission.host_id == Host.id
+        ).join(
+            TeamMember, TeamMember.team_id == HostPermission.team_id
+        ).where(
+            TeamMember.user_id == current_user.id,
+            HostPermission.is_active == True,
+        )
+    total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
     hosts = result.scalars().all()
@@ -245,15 +268,64 @@ async def _fetch_host_info(host: Host) -> dict:
     except Exception:
         return info
 
+    def _is_valid_ip(ip: str) -> bool:
+        if not ip:
+            return False
+        # IPv4
+        if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip):
+            return True
+        # IPv6 (简判)
+        if ":" in ip and re.match(r"^[0-9a-fA-F:]+$", ip):
+            return True
+        return False
+
     try:
-        # 获取公网IP
-        try:
-            pub_res = await conn.run("curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me || echo ''", check=False)
-            pub_ip = pub_res.stdout.strip()
-            if pub_ip and re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", pub_ip):
-                info["public_ip"] = pub_ip
-        except Exception:
-            pass
+        # 获取公网IP — 多途径尝试
+        pub_ip = None
+        # 方法1: curl
+        if not pub_ip:
+            try:
+                pub_res = await conn.run(
+                    "(curl -s --max-time 5 https://api.ipify.org 2>/dev/null) || "
+                    "(curl -s --max-time 5 https://ifconfig.me 2>/dev/null) || "
+                    "(curl -s --max-time 5 https://icanhazip.com 2>/dev/null) || echo ''",
+                    check=False
+                )
+                candidate = pub_res.stdout.strip().splitlines()[0] if pub_res.stdout else ""
+                if _is_valid_ip(candidate):
+                    pub_ip = candidate
+            except Exception:
+                pass
+
+        # 方法2: wget
+        if not pub_ip:
+            try:
+                pub_res = await conn.run(
+                    "(wget -qO- --timeout=5 https://api.ipify.org 2>/dev/null) || "
+                    "(wget -qO- --timeout=5 https://ifconfig.me 2>/dev/null) || echo ''",
+                    check=False
+                )
+                candidate = pub_res.stdout.strip().splitlines()[0] if pub_res.stdout else ""
+                if _is_valid_ip(candidate):
+                    pub_ip = candidate
+            except Exception:
+                pass
+
+        # 方法3: 通过外部DNS获取（部分内网主机可能有UDP 53出网）
+        if not pub_ip:
+            try:
+                pub_res = await conn.run(
+                    "dig +short myip.opendns.com @resolver1.opendns.com 2>/dev/null || nslookup myip.opendns.com resolver1.opendns.com 2>/dev/null | tail -n2 | head -n1 | awk '{print $2}' || echo ''",
+                    check=False
+                )
+                candidate = pub_res.stdout.strip().splitlines()[0] if pub_res.stdout else ""
+                if _is_valid_ip(candidate):
+                    pub_ip = candidate
+            except Exception:
+                pass
+
+        if pub_ip:
+            info["public_ip"] = pub_ip
 
         # 获取OS信息
         try:
