@@ -53,10 +53,8 @@ async def _collect_host_metrics(host: Host) -> Optional[dict]:
         disk_used_result = await conn.run(disk_used_cmd, check=False)
         disk_used_gb = _parse_float(disk_used_result.stdout)
 
-        # Network (simple approach using /proc/net/dev)
-        net_cmd = "cat /proc/net/dev | grep -E 'eth0|ens33|ens160' | head -1 | awk '{print $2,$10}'"
-        net_result = await conn.run(net_cmd, check=False)
-        network_in_mbps, network_out_mbps = _parse_network(net_result.stdout)
+        # Network rate (KB/s) — sample twice with 1s interval
+        network_in_kbps, network_out_kbps = await _sample_network_rate(conn)
 
         # Load average
         load_cmd = "cat /proc/loadavg | awk '{print $1,$2,$3}'"
@@ -76,8 +74,8 @@ async def _collect_host_metrics(host: Host) -> Optional[dict]:
             "disk_percent": disk_percent,
             "disk_used_gb": disk_used_gb,
             "disk_total_gb": disk_total_gb,
-            "network_in_mbps": network_in_mbps,
-            "network_out_mbps": network_out_mbps,
+            "network_in_kbps": network_in_kbps,
+            "network_out_kbps": network_out_kbps,
             "load_1min": load_1min,
             "load_5min": load_5min,
             "load_15min": load_15min,
@@ -98,18 +96,39 @@ def _parse_float(val: Optional[str]) -> Optional[float]:
         return None
 
 
-def _parse_network(val: Optional[str]) -> tuple:
-    if not val:
-        return None, None
-    parts = val.strip().split()
-    if len(parts) >= 2:
-        # Convert bytes to Mbps (rough estimation)
-        try:
-            in_bytes = float(parts[0])
-            out_bytes = float(parts[1])
-            return round(in_bytes / 1024 / 1024, 2), round(out_bytes / 1024 / 1024, 2)
-        except (ValueError, TypeError):
-            pass
+async def _sample_network_rate(conn) -> tuple:
+    """Sample /proc/net/dev twice with 1s interval and compute rate in KB/s."""
+    import time
+
+    async def _read_net_dev():
+        res = await conn.run(
+            "cat /proc/net/dev | grep -E 'eth0|ens33|ens160|enp|wlan' | head -1 | awk '{print $2,$10}'",
+            check=False,
+        )
+        return res.stdout
+
+    try:
+        first = _read_net_dev()
+        t1 = time.time()
+        await asyncio.sleep(1)
+        second = _read_net_dev()
+        t2 = time.time()
+
+        out1 = (await first).strip().split()
+        out2 = (await second).strip().split()
+
+        if len(out1) >= 2 and len(out2) >= 2:
+            in1 = float(out1[0])
+            out1_b = float(out1[1])
+            in2 = float(out2[0])
+            out2_b = float(out2[1])
+            dt = t2 - t1
+            if dt > 0:
+                in_rate = (in2 - in1) / 1024 / dt   # KB/s
+                out_rate = (out2_b - out1_b) / 1024 / dt
+                return round(in_rate, 2), round(out_rate, 2)
+    except Exception:
+        pass
     return None, None
 
 
@@ -152,8 +171,8 @@ async def collect_all_hosts_metrics():
                     disk_percent=metrics.get("disk_percent"),
                     disk_used_gb=metrics.get("disk_used_gb"),
                     disk_total_gb=metrics.get("disk_total_gb"),
-                    network_in_mbps=metrics.get("network_in_mbps"),
-                    network_out_mbps=metrics.get("network_out_mbps"),
+                    network_in_kbps=metrics.get("network_in_kbps"),
+                    network_out_kbps=metrics.get("network_out_kbps"),
                     load_1min=metrics.get("load_1min"),
                     load_5min=metrics.get("load_5min"),
                     load_15min=metrics.get("load_15min"),

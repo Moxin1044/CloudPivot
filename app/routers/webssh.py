@@ -202,50 +202,67 @@ async def websocket_ssh(
                                 msg_type = msg.get("type", "input")
 
                                 if msg_type == "input":
-                                    command = msg.get("data", "")
-                                    # Check permission and risk
-                                    perm_result = await db.execute(
-                                        select(HostPermission).where(
-                                            HostPermission.host_id == host_id,
-                                            HostPermission.is_active == True,
-                                        ).limit(1)
-                                    )
-                                    perm = perm_result.scalar_one_or_none()
+                                    data = msg.get("data", "")
+                                    # Send to SSH immediately (character by character)
+                                    process.stdin.write(data)
+                                    await process.stdin.drain()
 
-                                    if perm:
-                                        allowed, risk = check_permission_level(perm, command)
-                                        if not allowed:
-                                            await websocket.send_json({
-                                                "type": "blocked",
-                                                "command": command,
-                                                "risk": risk.value,
-                                                "message": f"Command blocked (risk: {risk.value})",
-                                            })
-                                            # Log blocked command
+                                    # Accumulate command buffer until Enter (\r or \n)
+                                    if not hasattr(read_ws, "_cmd_buffer"):
+                                        read_ws._cmd_buffer = {}
+                                    buf = read_ws._cmd_buffer.get(tab_id, "") + data
+                                    # Handle backspace / delete
+                                    if "\x7f" in buf or "\b" in buf:
+                                        buf = buf.replace("\x7f", "\b")
+                                        while "\b" in buf:
+                                            idx = buf.index("\b")
+                                            buf = buf[:max(0, idx - 1)] + buf[idx + 1:]
+                                    read_ws._cmd_buffer[tab_id] = buf
+
+                                    # Only log when user presses Enter
+                                    if "\r" in buf or "\n" in buf:
+                                        command = buf.splitlines()[0].strip()
+                                        read_ws._cmd_buffer[tab_id] = ""
+                                        if command:
+                                            # Check permission and risk
+                                            perm_result = await db.execute(
+                                                select(HostPermission).where(
+                                                    HostPermission.host_id == host_id,
+                                                    HostPermission.is_active == True,
+                                                ).limit(1)
+                                            )
+                                            perm = perm_result.scalar_one_or_none()
+
+                                            if perm:
+                                                allowed, risk = check_permission_level(perm, command)
+                                                if not allowed:
+                                                    await websocket.send_json({
+                                                        "type": "blocked",
+                                                        "command": command,
+                                                        "risk": risk.value,
+                                                        "message": f"Command blocked (risk: {risk.value})",
+                                                    })
+                                                    # Log blocked command
+                                                    cmd_log = SessionCommand(
+                                                        session_id=ssh_session.id,
+                                                        command=command,
+                                                        risk_level=risk,
+                                                        is_blocked=True,
+                                                    )
+                                                    db.add(cmd_log)
+                                                    await db.commit()
+                                                    continue
+
+                                            # Log command
+                                            risk = check_command_risk(command)
                                             cmd_log = SessionCommand(
                                                 session_id=ssh_session.id,
                                                 command=command,
                                                 risk_level=risk,
-                                                is_blocked=True,
+                                                is_blocked=False,
                                             )
                                             db.add(cmd_log)
                                             await db.commit()
-                                            continue
-
-                                    # Log command
-                                    risk = check_command_risk(command)
-                                    cmd_log = SessionCommand(
-                                        session_id=ssh_session.id,
-                                        command=command,
-                                        risk_level=risk,
-                                        is_blocked=False,
-                                    )
-                                    db.add(cmd_log)
-                                    await db.commit()
-
-                                    # Send to SSH
-                                    process.stdin.write(command)
-                                    await process.stdin.drain()
 
                                 elif msg_type == "resize":
                                     cols = msg.get("cols", 80)

@@ -31,7 +31,7 @@
               <t-col :span="3">
                 <t-card :bordered="false" class="metric-card">
                   <div class="metric-label">{{ $t('monitor.networkIn') }}</div>
-                  <div class="metric-value">{{ latestMetric.network_in_mbps?.toFixed(1) || '-' }} Mbps</div>
+                  <div class="metric-value">{{ latestMetric.network_in_kbps?.toFixed(1) || '-' }} KB/s</div>
                 </t-card>
               </t-col>
             </t-row>
@@ -95,8 +95,8 @@ const metricTypeOptions = [
   { label: t('monitor.metricTypeCpu'), value: 'cpu_percent' },
   { label: t('monitor.metricTypeMemory'), value: 'memory_percent' },
   { label: t('monitor.metricTypeDisk'), value: 'disk_percent' },
-  { label: t('monitor.metricTypeNetIn'), value: 'network_in_mbps' },
-  { label: t('monitor.metricTypeNetOut'), value: 'network_out_mbps' },
+  { label: t('monitor.metricTypeNetIn'), value: 'network_in_kbps' },
+  { label: t('monitor.metricTypeNetOut'), value: 'network_out_kbps' },
   { label: t('monitor.metricTypeLoad'), value: 'load_1min' },
 ];
 const conditionOptions = [
@@ -112,8 +112,8 @@ const metricColumns = [
   { colKey: 'cpu_percent', title: t('monitor.cpuPercent'), width: 80 },
   { colKey: 'memory_percent', title: t('monitor.memoryPercent'), width: 80 },
   { colKey: 'disk_percent', title: t('monitor.diskPercent'), width: 80 },
-  { colKey: 'network_in_mbps', title: t('monitor.networkInMbps'), width: 100 },
-  { colKey: 'network_out_mbps', title: t('monitor.networkOutMbps'), width: 100 },
+  { colKey: 'network_in_kbps', title: t('monitor.networkInKbps'), width: 100 },
+  { colKey: 'network_out_kbps', title: t('monitor.networkOutKbps'), width: 100 },
   { colKey: 'load_1min', title: t('monitor.load1'), width: 80 },
 ];
 
@@ -132,7 +132,8 @@ const ruleColumns = [
 async function loadHosts() {
   try {
     const res: any = await hostApi.list({ limit: 100 });
-    hostOptions.value = (Array.isArray(res) ? res : []).map((h: any) => ({ label: `${h.name} (${h.ip_address})`, value: h.id }));
+    const items = Array.isArray(res) ? res : (res.items || []);
+    hostOptions.value = items.map((h: any) => ({ label: `${h.name} (${h.ip_address})`, value: h.id }));
     if (hostOptions.value.length) selectedHostId.value = hostOptions.value[0].value;
   } catch (e) { /* */ }
 }

@@ -129,16 +129,16 @@ function updateCharts(data: any[]) {
   netChart?.setOption(
     commonOption(t('monitor.network'), [
       {
-        name: t('monitor.networkInMbps'),
+        name: t('monitor.networkInKbps'),
         type: 'line',
         smooth: true,
-        data: data.map((d) => d.network_in_mbps ?? null),
+        data: data.map((d) => d.network_in_kbps ?? null),
       },
       {
-        name: t('monitor.networkOutMbps'),
+        name: t('monitor.networkOutKbps'),
         type: 'line',
         smooth: true,
-        data: data.map((d) => d.network_out_mbps ?? null),
+        data: data.map((d) => d.network_out_kbps ?? null),
       },
     ]),
     true

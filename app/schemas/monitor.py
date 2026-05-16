@@ -15,8 +15,8 @@ class HostMetricResponse(BaseModel):
     disk_percent: Optional[float] = None
     disk_used_gb: Optional[float] = None
     disk_total_gb: Optional[float] = None
-    network_in_mbps: Optional[float] = None
-    network_out_mbps: Optional[float] = None
+    network_in_kbps: Optional[float] = None
+    network_out_kbps: Optional[float] = None
     load_1min: Optional[float] = None
     load_5min: Optional[float] = None
     load_15min: Optional[float] = None
@@ -29,8 +29,8 @@ class MetricType(str, enum.Enum):
     cpu_percent = "cpu_percent"
     memory_percent = "memory_percent"
     disk_percent = "disk_percent"
-    network_in_mbps = "network_in_mbps"
-    network_out_mbps = "network_out_mbps"
+    network_in_kbps = "network_in_kbps"
+    network_out_kbps = "network_out_kbps"
     load_1min = "load_1min"
 
 

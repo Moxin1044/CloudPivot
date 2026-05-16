@@ -72,7 +72,8 @@ function setTerminalRef(tabId: string, el: any) {
 async function loadHosts() {
   try {
     const res: any = await hostApi.list({ limit: 100 });
-    hostOptions.value = (Array.isArray(res) ? res : []).map((h: any) => ({
+    const items = Array.isArray(res) ? res : (res.items || []);
+    hostOptions.value = items.map((h: any) => ({
       label: `${h.name} (${h.ip_address})`,
       value: h.id,
     }));
@@ -240,20 +241,23 @@ onBeforeUnmount(() => {
 <style scoped>
 .terminal-container {
   position: relative;
-  height: 500px;
+  height: calc(100vh - 220px);
+  min-height: 480px;
   background: #1e1e2e;
   border-radius: 8px;
   overflow: hidden;
 }
 .terminal-instance {
   height: 100%;
-  padding: 8px;
+  padding: 8px 8px 28px 8px;
+  box-sizing: border-box;
 }
 .terminal-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 500px;
+  height: calc(100vh - 220px);
+  min-height: 480px;
   background: #1e1e2e;
   border-radius: 8px;
 }

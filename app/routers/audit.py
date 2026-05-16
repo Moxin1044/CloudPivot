@@ -205,15 +205,14 @@ async def list_ssh_login_logs(
     db: AsyncSession = Depends(get_db),
 ):
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
-    base_query = select(SSHLoginLog).where(SSHLoginLog.login_at >= since)
+    filters = [SSHLoginLog.login_at >= since]
     if host_id:
-        base_query = base_query.where(SSHLoginLog.host_id == host_id)
+        filters.append(SSHLoginLog.host_id == host_id)
     if risk_level:
-        base_query = base_query.where(SSHLoginLog.risk_level == risk_level)
+        filters.append(SSHLoginLog.risk_level == risk_level)
     if is_success is not None:
-        base_query = base_query.where(SSHLoginLog.is_success == is_success)
+        filters.append(SSHLoginLog.is_success == is_success)
     if keyword:
-        # keyword 过滤通过子查询实现，避免 join 后 count 出现笛卡尔积
         host_ids_result = await db.execute(
             select(Host.id).where(Host.name.ilike(f"%{keyword}%"))
         )
@@ -224,11 +223,12 @@ async def list_ssh_login_logs(
         )
         if matched_host_ids:
             kw_filter = kw_filter | SSHLoginLog.host_id.in_(matched_host_ids)
-        base_query = base_query.where(kw_filter)
+        filters.append(kw_filter)
     if not current_user.is_admin:
-        base_query = base_query.where(SSHLoginLog.username == current_user.username)
+        filters.append(SSHLoginLog.username == current_user.username)
 
-    count_query = select(func.count()).select_from(base_query.subquery())
+    base_query = select(SSHLoginLog).where(and_(*filters))
+    count_query = select(func.count()).select_from(SSHLoginLog).where(and_(*filters))
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
 
@@ -265,47 +265,47 @@ async def ssh_login_analysis(
     db: AsyncSession = Depends(get_db),
 ):
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
-    base_query = select(SSHLoginLog).where(SSHLoginLog.login_at >= since)
+    filters = [SSHLoginLog.login_at >= since]
     if host_id:
-        base_query = base_query.where(SSHLoginLog.host_id == host_id)
+        filters.append(SSHLoginLog.host_id == host_id)
 
-    # 基础统计
+    # 基础统计 (avoid subquery cartesian product)
     total_result = await db.execute(
-        select(func.count()).select_from(base_query.subquery())
+        select(func.count()).select_from(SSHLoginLog).where(and_(*filters))
     )
     total_logins = total_result.scalar() or 0
 
     failed_result = await db.execute(
-        select(func.count()).select_from(base_query.where(SSHLoginLog.is_success == False).subquery())
+        select(func.count()).select_from(SSHLoginLog).where(and_(*filters, SSHLoginLog.is_success == False))
     )
     failed_logins = failed_result.scalar() or 0
 
     unique_ips_result = await db.execute(
-        select(func.count(func.distinct(SSHLoginLog.login_ip))).select_from(base_query.subquery())
+        select(func.count(func.distinct(SSHLoginLog.login_ip))).select_from(SSHLoginLog).where(and_(*filters))
     )
     unique_ips = unique_ips_result.scalar() or 0
 
     unique_users_result = await db.execute(
-        select(func.count(func.distinct(SSHLoginLog.username))).select_from(base_query.subquery())
+        select(func.count(func.distinct(SSHLoginLog.username))).select_from(SSHLoginLog).where(and_(*filters))
     )
     unique_users = unique_users_result.scalar() or 0
 
     brute_result = await db.execute(
-        select(func.count()).select_from(base_query.where(SSHLoginLog.is_brute_force == True).subquery())
+        select(func.count()).select_from(SSHLoginLog).where(and_(*filters, SSHLoginLog.is_brute_force == True))
     )
     brute_force_attempts = brute_result.scalar() or 0
 
     new_ip_result = await db.execute(
-        select(func.count()).select_from(base_query.where(SSHLoginLog.is_new_ip == True).subquery())
+        select(func.count()).select_from(SSHLoginLog).where(and_(*filters, SSHLoginLog.is_new_ip == True))
     )
     new_ip_logins = new_ip_result.scalar() or 0
 
     # Top source IPs
     top_ips_result = await db.execute(
         select(SSHLoginLog.login_ip, func.count().label("cnt"))
-        .where(SSHLoginLog.login_at >= since)
+        .where(and_(*filters))
         .group_by(SSHLoginLog.login_ip)
-        .order_by(desc("cnt"))
+        .order_by(desc(func.count()))
         .limit(10)
     )
     top_source_ips = [{"ip": ip, "count": cnt} for ip, cnt in top_ips_result.all() if ip]
@@ -313,29 +313,27 @@ async def ssh_login_analysis(
     # Top users
     top_users_result = await db.execute(
         select(SSHLoginLog.username, func.count().label("cnt"))
-        .where(SSHLoginLog.login_at >= since)
+        .where(and_(*filters))
         .group_by(SSHLoginLog.username)
-        .order_by(desc("cnt"))
+        .order_by(desc(func.count()))
         .limit(10)
     )
     top_users = [{"username": u, "count": cnt} for u, cnt in top_users_result.all() if u]
 
     # Hourly trend (PostgreSQL compatible)
+    hour_expr = func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00').label("hour")
     hourly_result = await db.execute(
-        select(
-            func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00').label("hour"),
-            func.count().label("cnt"),
-        )
+        select(hour_expr, func.count().label("cnt"))
         .where(SSHLoginLog.login_at >= since)
-        .group_by(func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00'))
-        .order_by("hour")
+        .group_by(hour_expr)
+        .order_by(hour_expr)
     )
     hourly_trend = [{"hour": h, "count": cnt} for h, cnt in hourly_result.all() if h]
 
     # Risk distribution
     risk_result = await db.execute(
         select(SSHLoginLog.risk_level, func.count().label("cnt"))
-        .where(SSHLoginLog.login_at >= since)
+        .where(and_(*filters))
         .group_by(SSHLoginLog.risk_level)
     )
     risk_distribution = [{"level": lvl, "count": cnt} for lvl, cnt in risk_result.all()]

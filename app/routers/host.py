@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
 from sqlalchemy.orm import selectinload
 from typing import Optional
+from datetime import datetime, timedelta, timezone as tz
 from app.database import get_db
 from app.models.host import Host, HostGroup, HostTag, AuthType, HostStatus, host_tag_association
 from app.models.monitor import HostMetric
@@ -181,7 +182,6 @@ async def get_host_metrics_chart(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from datetime import timedelta, timezone as tz
     since = datetime.now(tz.utc) - timedelta(hours=hours)
     result = await db.execute(
         select(HostMetric)
@@ -195,8 +195,8 @@ async def get_host_metrics_chart(
             "cpu_percent": m.cpu_percent,
             "memory_percent": m.memory_percent,
             "disk_percent": m.disk_percent,
-            "network_in_mbps": m.network_in_mbps,
-            "network_out_mbps": m.network_out_mbps,
+            "network_in_kbps": m.network_in_kbps,
+            "network_out_kbps": m.network_out_kbps,
             "load_1min": m.load_1min,
         }
         for m in metrics
