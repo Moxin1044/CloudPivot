@@ -68,22 +68,13 @@ async def collect_host_ssh_logs(host: Host, db: AsyncSession) -> int:
     采集单个主机的SSH登录日志
     返回新插入的记录数
     """
-    from app.core.security import decrypt_data
-
-    password = None
-    private_key = None
-    if host.password_encrypted:
-        password = decrypt_data(host.password_encrypted)
-    if host.private_key_encrypted:
-        private_key = decrypt_data(host.private_key_encrypted)
-
     try:
         conn = await ssh_pool.get_connection(
             host=host.ip_address,
             port=host.port,
             username=host.username,
-            password=password,
-            private_key=private_key,
+            password=host.password_encrypted or None,
+            private_key=host.private_key_encrypted or None,
             timeout=15,
         )
     except Exception as e:

@@ -15,7 +15,7 @@ from app.schemas.host import (
 )
 from app.dependencies import get_current_user, get_current_active_admin
 from app.core.ssh import test_ssh_connectivity, ssh_pool
-from app.core.security import hash_password, decrypt_data
+from app.core.security import hash_password
 import time
 import re
 
@@ -233,20 +233,13 @@ async def delete_host(
 async def _fetch_host_info(host: Host) -> dict:
     """SSH连接到主机并获取系统信息（公网IP、OS名称、版本）"""
     info = {"public_ip": None, "os_name": None, "os_version": None, "os_info": None}
-    password = None
-    private_key = None
-    if host.password_encrypted:
-        password = decrypt_data(host.password_encrypted)
-    if host.private_key_encrypted:
-        private_key = decrypt_data(host.private_key_encrypted)
-
     try:
         conn = await ssh_pool.get_connection(
             host=host.ip_address,
             port=host.port,
             username=host.username,
-            password=password,
-            private_key=private_key,
+            password=host.password_encrypted or None,
+            private_key=host.private_key_encrypted or None,
             timeout=15,
         )
     except Exception:

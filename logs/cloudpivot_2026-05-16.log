@@ -4162,3 +4162,93 @@ created
 2026-05-16 18:44:25 | INFO     | main:lifespan:102 - Cleanup complete
 2026-05-16 18:44:25 | INFO     | main:lifespan:99 - Shutting down...
 2026-05-16 18:44:25 | INFO     | main:lifespan:102 - Cleanup complete
+2026-05-16 18:47:50 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:50 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:50 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:50 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:50 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:47:50 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:47:58 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:58 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:47:58 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:47:58 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:58 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:58 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:47:58 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:47:58 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:47:58 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:47:58 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:47:58 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:47:58 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:05 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:05 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:05 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:06 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:06 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:06 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:06 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:06 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:06 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:06 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:06 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:06 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:13 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:13 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:13 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:14 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:14 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:14 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:14 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:14 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:14 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:14 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:14 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:14 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:20 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:20 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:20 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:21 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:21 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:21 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:21 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:21 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:21 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:21 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:21 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:21 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:27 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:27 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:27 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:28 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:28 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:28 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:28 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:28 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:28 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:28 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:28 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:28 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:36 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:36 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:36 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:37 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:37 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:37 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:37 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:37 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:37 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:37 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:37 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:37 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:44 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:45 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:45 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:45 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:45 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:45 | INFO     | main:lifespan:79 - Starting CloudPivot in production mode
+2026-05-16 18:48:45 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:45 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:45 | INFO     | main:lifespan:85 - Database tables ensured
+2026-05-16 18:48:45 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:45 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
+2026-05-16 18:48:45 | INFO     | main:_ensure_default_admin:51 - Admin user already exists
