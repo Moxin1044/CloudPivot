@@ -59,16 +59,13 @@
           </template>
           <t-form :data="notifForm" label-align="top" :label-width="120">
             <t-form-item :label="$t('settings.notificationEmail')" name="notification_email">
-              <t-input v-model="notifForm.notification_email" placeholder="your@email.com" />
-              <div class="form-tip">{{ $t('settings.emailTip') }}</div>
+              <t-input v-model="notifForm.notification_email" placeholder="your@email.com" :tips="$t('settings.emailTip')" />
             </t-form-item>
             <t-form-item :label="$t('settings.feishuWebhook')" name="feishu_webhook">
-              <t-input v-model="notifForm.feishu_webhook" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..." />
-              <div class="form-tip">{{ $t('settings.feishuTip') }}</div>
+              <t-input v-model="notifForm.feishu_webhook" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..." :tips="$t('settings.feishuTip')" />
             </t-form-item>
             <t-form-item :label="$t('settings.dingtalkWebhook')" name="dingtalk_webhook">
-              <t-input v-model="notifForm.dingtalk_webhook" placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." />
-              <div class="form-tip">{{ $t('settings.dingtalkTip') }}</div>
+              <t-input v-model="notifForm.dingtalk_webhook" placeholder="https://oapi.dingtalk.com/robot/send?access_token=..." :tips="$t('settings.dingtalkTip')" />
             </t-form-item>
             <t-form-item :label="$t('settings.notifyChannels')" name="notify_channels">
               <t-checkbox-group v-model="notifChannels">
