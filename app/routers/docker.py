@@ -64,17 +64,18 @@ async def list_containers(
         containers = await docker_client.list_containers(all=all)
         result = []
         for c in containers:
-            names = c.get("Names", [])
+            raw = c._container if hasattr(c, "_container") else c
+            names = raw.get("Names", [])
             name = names[0].lstrip("/") if names else None
             result.append(ContainerResponse(
-                id=c.get("Id", "")[:12],
+                id=raw.get("Id", "")[:12],
                 name=name,
-                image=c.get("Image"),
-                status=c.get("Status"),
-                state=c.get("State"),
-                ports=c.get("Ports"),
-                labels=c.get("Labels"),
-                created=c.get("Created"),
+                image=raw.get("Image"),
+                status=raw.get("Status"),
+                state=raw.get("State"),
+                ports=raw.get("Ports"),
+                labels=raw.get("Labels"),
+                created=raw.get("Created"),
             ))
         return result
     except Exception as e:

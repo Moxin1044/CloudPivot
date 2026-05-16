@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+import enum
 from app.models.monitor import AlertSeverity, AlertStatus
 
 
@@ -24,10 +25,19 @@ class HostMetricResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MetricType(str, enum.Enum):
+    cpu_percent = "cpu_percent"
+    memory_percent = "memory_percent"
+    disk_percent = "disk_percent"
+    network_in_mbps = "network_in_mbps"
+    network_out_mbps = "network_out_mbps"
+    load_1min = "load_1min"
+
+
 class AlertRuleCreate(BaseModel):
     name: str
     description: Optional[str] = None
-    metric_type: str
+    metric_type: MetricType
     condition: str
     threshold: float
     duration_seconds: int = 0
@@ -43,7 +53,7 @@ class AlertRuleResponse(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
-    metric_type: str
+    metric_type: MetricType
     condition: str
     threshold: float
     duration_seconds: int

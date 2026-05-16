@@ -30,7 +30,7 @@ async def list_hosts(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(Host)
+    query = select(Host).options(selectinload(Host.tags))
     if group_id is not None:
         query = query.where(Host.group_id == group_id)
     if status is not None:
@@ -57,15 +57,11 @@ async def list_hosts(
     result = await db.execute(query.offset(skip).limit(limit))
     hosts = result.scalars().all()
 
-    # Load tags for each host
+    # Tags already eager-loaded; build response manually to include tag dicts
     response = []
     for host in hosts:
         host_dict = HostResponse.model_validate(host).model_dump()
-        tag_result = await db.execute(
-            select(HostTag).join(host_tag_association).where(host_tag_association.c.host_id == host.id)
-        )
-        tags = tag_result.scalars().all()
-        host_dict["tags"] = [{"id": t.id, "name": t.name, "color": t.color} for t in tags]
+        host_dict["tags"] = [{"id": t.id, "name": t.name, "color": t.color} for t in host.tags]
         response.append(host_dict)
     return response
 

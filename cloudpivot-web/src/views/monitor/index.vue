@@ -52,7 +52,7 @@
     <t-dialog v-model:visible="showRuleCreate" :header="$t('monitor.createAlertRule')" @confirm="onCreateRule">
       <t-form :data="ruleForm" label-align="top">
         <t-form-item :label="$t('monitor.ruleName')"><t-input v-model="ruleForm.name" /></t-form-item>
-        <t-form-item :label="$t('monitor.metricTypeLabel')"><t-input v-model="ruleForm.metric_type" placeholder="cpu_percent, memory_percent..." /></t-form-item>
+        <t-form-item :label="$t('monitor.metricTypeLabel')"><t-select v-model="ruleForm.metric_type" :options="metricTypeOptions" /></t-form-item>
         <t-form-item :label="$t('monitor.conditionLabel')"><t-select v-model="ruleForm.condition" :options="conditionOptions" /></t-form-item>
         <t-form-item :label="$t('monitor.thresholdLabel')"><t-input-number v-model="ruleForm.threshold" /></t-form-item>
         <t-form-item :label="$t('monitor.severityLabel')"><t-select v-model="ruleForm.severity" :options="severityOptions" /></t-form-item>
@@ -87,6 +87,14 @@ const ruleForm = reactive({
   name: '', metric_type: 'cpu_percent', condition: 'gt', threshold: 90, severity: 'warning',
 });
 
+const metricTypeOptions = [
+  { label: t('monitor.metricTypeCpu'), value: 'cpu_percent' },
+  { label: t('monitor.metricTypeMemory'), value: 'memory_percent' },
+  { label: t('monitor.metricTypeDisk'), value: 'disk_percent' },
+  { label: t('monitor.metricTypeNetIn'), value: 'network_in_mbps' },
+  { label: t('monitor.metricTypeNetOut'), value: 'network_out_mbps' },
+  { label: t('monitor.metricTypeLoad'), value: 'load_1min' },
+];
 const conditionOptions = [
   { label: t('monitor.gt'), value: 'gt' }, { label: t('monitor.lt'), value: 'lt' },
   { label: t('monitor.gte'), value: 'gte' }, { label: t('monitor.lte'), value: 'lte' },
