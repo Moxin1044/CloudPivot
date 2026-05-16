@@ -1,14 +1,11 @@
 <template>
   <div class="team-page">
-    <t-card :bordered="false">
-      <template #title>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>{{ $t('team.title') }}</span>
-          <t-button theme="primary" @click="showCreate = true">
-            <template #icon><t-icon name="add" /></template>
-            {{ $t('common.create') }}
-          </t-button>
-        </div>
+    <t-card :bordered="false" :title="$t('team.title')">
+      <template #actions>
+        <t-button theme="primary" @click="showCreate = true">
+          <template #icon><t-icon name="add" /></template>
+          {{ $t('common.create') }}
+        </t-button>
       </template>
       <t-table :data="teams" :columns="columns" :loading="loading" row-key="id" />
     </t-card>
