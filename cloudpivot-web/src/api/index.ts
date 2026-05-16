@@ -204,33 +204,6 @@ export const monitorApi = {
   resolveAlert: (id: number) => request.post(`/monitor/alerts/${id}/resolve`),
 };
 
-// ===== Docker API =====
-export const dockerApi = {
-  listHosts: () => request.get('/docker/hosts'),
-  createHost: (data: any) => request.post('/docker/hosts', data),
-  deleteHost: (id: number) => request.delete(`/docker/hosts/${id}`),
-  listContainers: (all?: boolean) => request.get('/docker/containers', { params: { all } }),
-  getContainer: (id: string) => request.get(`/docker/containers/${id}`),
-  startContainer: (id: string) => request.post(`/docker/containers/${id}/start`),
-  stopContainer: (id: string, timeout?: number) =>
-    request.post(`/docker/containers/${id}/stop`, { timeout }),
-  restartContainer: (id: string, timeout?: number) =>
-    request.post(`/docker/containers/${id}/restart`, { timeout }),
-  removeContainer: (id: string, force?: boolean) =>
-    request.delete(`/docker/containers/${id}`, { params: { force } }),
-  getContainerLogs: (id: string, tail?: number) =>
-    request.get(`/docker/containers/${id}/logs`, { params: { tail } }),
-  getContainerStats: (id: string) => request.get(`/docker/containers/${id}/stats`),
-  execInContainer: (id: string, command: string, tty?: boolean) =>
-    request.post(`/docker/containers/${id}/exec`, { command, tty }),
-  listImages: () => request.get('/docker/images'),
-  pullImage: (repository: string, tag?: string) =>
-    request.post('/docker/images/pull', null, { params: { repository, tag } }),
-  removeImage: (id: string, force?: boolean) =>
-    request.delete(`/docker/images/${id}`, { params: { force } }),
-  getInfo: () => request.get('/docker/info'),
-};
-
 // ===== Dashboard API =====
 export const dashboardApi = {
   getOverview: () => request.get('/dashboard'),

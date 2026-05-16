@@ -8,8 +8,6 @@ class DashboardOverview(BaseModel):
     online_hosts: int = 0
     offline_hosts: int = 0
     active_sessions: int = 0
-    total_containers: int = 0
-    running_containers: int = 0
     total_users: int = 0
     active_alerts: int = 0
     risk_commands_today: int = 0

@@ -100,6 +100,7 @@ const hourOptions = [
 
 async function loadHosts() {
   try {
+    // The backend host list already respects user permissions
     const res: any = await hostApi.list({ limit: 1000 });
     const items = Array.isArray(res) ? res : (res.items || []);
     hostOptions.value = items.map((h: any) => ({ label: `${h.name} (${h.ip_address})`, value: h.id }));

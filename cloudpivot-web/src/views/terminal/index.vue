@@ -66,7 +66,18 @@ const fitAddons = ref<Record<string, FitAddon>>({});
 const sockets = ref<Record<string, WebSocket>>({});
 
 function setTerminalRef(tabId: string, el: any) {
-  if (el) terminalRefs.value[tabId] = el;
+  if (el) {
+    terminalRefs.value[tabId] = el;
+  } else {
+    // DOM 元素被销毁时，清理 Terminal 实例
+    const term = terminals.value[tabId];
+    if (term) {
+      term.dispose();
+      delete terminals.value[tabId];
+      delete fitAddons.value[tabId];
+    }
+    delete terminalRefs.value[tabId];
+  }
 }
 
 async function loadHosts() {
@@ -96,6 +107,13 @@ function addTab() {
 function initTerminal(tabId: string) {
   const el = terminalRefs.value[tabId];
   if (!el) return;
+
+  // 防止同一 tabId 下重复创建 Terminal（标签切换时 DOM 会重建）
+  if (terminals.value[tabId]) {
+    terminals.value[tabId].dispose();
+    delete terminals.value[tabId];
+    delete fitAddons.value[tabId];
+  }
 
   const term = new Terminal({
     cursorBlink: true,
@@ -139,6 +157,8 @@ function initTerminal(tabId: string) {
   fitAddons.value[tabId] = fitAddon;
 
   term.onData((data) => {
+    // 确保当前 tab 仍然是激活 tab，防止标签切换时旧 handler 发送数据到新 tab 的 socket
+    if (activeTab.value !== tabId) return;
     const ws = sockets.value[tabId];
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'input', data }));
@@ -164,6 +184,12 @@ function connect() {
   const tab = tabs.value.find(t => t.id === tabId);
   if (!tab) return;
 
+  // 关闭旧连接（如果存在）
+  const oldWs = sockets.value[tabId];
+  if (oldWs && oldWs.readyState !== WebSocket.CLOSED) {
+    oldWs.close();
+  }
+
   const token = localStorage.getItem('token');
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const wsBase = `${wsProtocol}//${window.location.host}`;
@@ -179,6 +205,8 @@ function connect() {
   };
 
   ws.onmessage = (event) => {
+    // 确保当前 tab 仍然是激活 tab
+    if (activeTab.value !== tabId) return;
     const term = terminals.value[tabId];
     if (!term) return;
 

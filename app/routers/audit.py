@@ -7,6 +7,8 @@ from app.models.log import LoginLog, OperationLog
 from app.models.user import User
 from app.models.ssh_login_log import SSHLoginLog
 from app.models.host import Host
+from app.models.permission import HostPermission, TemporaryPermission
+from app.models.team import TeamMember
 from app.schemas.ssh_login_log import SSHLoginAnalysisSummary
 from app.dependencies import get_current_user
 from typing import Optional
@@ -31,6 +33,50 @@ def _to_dict_list(items):
     return result
 
 
+async def _get_user_accessible_host_ids(user: User, db: AsyncSession) -> set[int] | None:
+    """Get host IDs accessible by the user. Returns None if admin (all hosts)."""
+    if user.is_admin:
+        return None
+
+    host_ids = set()
+
+    # Hosts via direct user permissions
+    perm_result = await db.execute(
+        select(HostPermission.host_id).where(
+            HostPermission.user_id == user.id,
+            HostPermission.is_active == True,
+        )
+    )
+    host_ids.update(r[0] for r in perm_result.all())
+
+    # Hosts via team memberships
+    team_result = await db.execute(
+        select(TeamMember.team_id).where(TeamMember.user_id == user.id)
+    )
+    team_ids = [r[0] for r in team_result.all()]
+    if team_ids:
+        team_perm_result = await db.execute(
+            select(HostPermission.host_id).where(
+                HostPermission.team_id.in_(team_ids),
+                HostPermission.is_active == True,
+            )
+        )
+        host_ids.update(r[0] for r in team_perm_result.all())
+
+    # Hosts via temporary permissions
+    now = datetime.now(timezone.utc)
+    temp_result = await db.execute(
+        select(TemporaryPermission.host_id).where(
+            TemporaryPermission.user_id == user.id,
+            TemporaryPermission.is_revoked == False,
+            TemporaryPermission.expires_at > now,
+        )
+    )
+    host_ids.update(r[0] for r in temp_result.all())
+
+    return host_ids
+
+
 @router.get("/sessions", summary="获取会话审计列表")
 async def list_audit_sessions(
     skip: int = 0,
@@ -42,6 +88,8 @@ async def list_audit_sessions(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     query = select(SSHSession).order_by(desc(SSHSession.started_at))
     count_query = select(func.count()).select_from(SSHSession)
     if user_id:
@@ -60,9 +108,14 @@ async def list_audit_sessions(
         )
         query = query.where(like_filter)
         count_query = count_query.where(like_filter)
-    if not current_user.is_admin:
-        query = query.where(SSHSession.user_id == current_user.id)
-        count_query = count_query.where(SSHSession.user_id == current_user.id)
+    # Non-admin: only sessions on accessible hosts
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            query = query.where(SSHSession.host_id.in_(accessible_host_ids))
+            count_query = count_query.where(SSHSession.host_id.in_(accessible_host_ids))
+        else:
+            query = query.where(False)
+            count_query = count_query.where(False)
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
@@ -80,6 +133,8 @@ async def list_audit_commands(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     query = select(SessionCommand).order_by(desc(SessionCommand.executed_at))
     count_query = select(func.count()).select_from(SessionCommand)
     if risk_level:
@@ -91,6 +146,17 @@ async def list_audit_commands(
     if keyword:
         query = query.where(SessionCommand.command.ilike(f"%{keyword}%"))
         count_query = count_query.where(SessionCommand.command.ilike(f"%{keyword}%"))
+    # Non-admin: only commands from sessions on accessible hosts
+    if accessible_host_ids is not None:
+        accessible_sessions = select(SSHSession.id).where(
+            SSHSession.host_id.in_(accessible_host_ids) if accessible_host_ids else False
+        )
+        if accessible_host_ids:
+            query = query.where(SessionCommand.session_id.in_(accessible_sessions))
+            count_query = count_query.where(SessionCommand.session_id.in_(accessible_sessions))
+        else:
+            query = query.where(False)
+            count_query = count_query.where(False)
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
@@ -137,12 +203,25 @@ async def list_risk_commands(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     base_filter = SessionCommand.risk_level.in_([RiskLevel.warning, RiskLevel.danger])
     query = select(SessionCommand).where(base_filter).order_by(desc(SessionCommand.executed_at))
     count_query = select(func.count()).select_from(SessionCommand).where(base_filter)
     if keyword:
         query = query.where(SessionCommand.command.ilike(f"%{keyword}%"))
         count_query = count_query.where(SessionCommand.command.ilike(f"%{keyword}%"))
+    # Non-admin: only risk commands from sessions on accessible hosts
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            accessible_sessions = select(SSHSession.id).where(
+                SSHSession.host_id.in_(accessible_host_ids)
+            )
+            query = query.where(SessionCommand.session_id.in_(accessible_sessions))
+            count_query = count_query.where(SessionCommand.session_id.in_(accessible_sessions))
+        else:
+            query = query.where(False)
+            count_query = count_query.where(False)
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
     result = await db.execute(query.offset(skip).limit(limit))
@@ -157,9 +236,20 @@ async def export_commands(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     query = select(SessionCommand).order_by(desc(SessionCommand.executed_at))
     if risk_level:
         query = query.where(SessionCommand.risk_level == risk_level)
+    # Non-admin: only commands from sessions on accessible hosts
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            accessible_sessions = select(SSHSession.id).where(
+                SSHSession.host_id.in_(accessible_host_ids)
+            )
+            query = query.where(SessionCommand.session_id.in_(accessible_sessions))
+        else:
+            query = query.where(False)
     result = await db.execute(query.limit(10000))
     commands = result.scalars().all()
 
@@ -204,6 +294,8 @@ async def list_ssh_login_logs(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
     filters = [SSHLoginLog.login_at >= since]
     if host_id:
@@ -224,8 +316,12 @@ async def list_ssh_login_logs(
         if matched_host_ids:
             kw_filter = kw_filter | SSHLoginLog.host_id.in_(matched_host_ids)
         filters.append(kw_filter)
-    if not current_user.is_admin:
-        filters.append(SSHLoginLog.username == current_user.username)
+    # Non-admin: only logs from accessible hosts
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            filters.append(SSHLoginLog.host_id.in_(accessible_host_ids))
+        else:
+            filters.append(False)
 
     base_query = select(SSHLoginLog).where(and_(*filters))
     count_query = select(func.count()).select_from(SSHLoginLog).where(and_(*filters))
@@ -237,10 +333,10 @@ async def list_ssh_login_logs(
     items = result.scalars().all()
 
     # 批量查询主机名
-    host_ids = {log.host_id for log in items if log.host_id}
+    log_host_ids = {log.host_id for log in items if log.host_id}
     host_map = {}
-    if host_ids:
-        host_res = await db.execute(select(Host.id, Host.name).where(Host.id.in_(host_ids)))
+    if log_host_ids:
+        host_res = await db.execute(select(Host.id, Host.name).where(Host.id.in_(log_host_ids)))
         for hid, hname in host_res.all():
             host_map[hid] = hname
 
@@ -264,12 +360,20 @@ async def ssh_login_analysis(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    accessible_host_ids = await _get_user_accessible_host_ids(current_user, db)
+
     since = datetime.now(timezone.utc) - timedelta(hours=hours)
     filters = [SSHLoginLog.login_at >= since]
     if host_id:
         filters.append(SSHLoginLog.host_id == host_id)
+    # Non-admin: only logs from accessible hosts
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            filters.append(SSHLoginLog.host_id.in_(accessible_host_ids))
+        else:
+            filters.append(False)
 
-    # 基础统计 (avoid subquery cartesian product)
+    # 基础统计
     total_result = await db.execute(
         select(func.count()).select_from(SSHLoginLog).where(and_(*filters))
     )
@@ -322,9 +426,19 @@ async def ssh_login_analysis(
 
     # Hourly trend (PostgreSQL compatible)
     hour_expr = func.to_char(SSHLoginLog.login_at, 'YYYY-MM-DD HH24:00').label("hour")
+    # Build hourly filters (same as main filters)
+    hourly_filters = [SSHLoginLog.login_at >= since]
+    if host_id:
+        hourly_filters.append(SSHLoginLog.host_id == host_id)
+    if accessible_host_ids is not None:
+        if accessible_host_ids:
+            hourly_filters.append(SSHLoginLog.host_id.in_(accessible_host_ids))
+        else:
+            hourly_filters.append(False)
+
     hourly_result = await db.execute(
         select(hour_expr, func.count().label("cnt"))
-        .where(SSHLoginLog.login_at >= since)
+        .where(and_(*hourly_filters))
         .group_by(hour_expr)
         .order_by(hour_expr)
     )
@@ -372,8 +486,8 @@ async def trigger_ssh_log_collect(
             n = await collect_host_ssh_logs(host, db)
             total += n
         except Exception as e:
+            from app.core.logger import logger
             logger.error(f"Manual collect error for host {host.name}: {e}")
     if total > 0:
         await analyze_ssh_logs(db)
     return {"message": f"Collected {total} new SSH login records", "count": total}
-

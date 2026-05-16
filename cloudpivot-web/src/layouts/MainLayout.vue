@@ -42,10 +42,6 @@
           <template #icon><t-icon name="chart-bar" /></template>
           {{ $t('menu.monitor') }}
         </t-menu-item>
-        <t-menu-item value="/docker">
-          <template #icon><t-icon name="control-platform" /></template>
-          {{ $t('menu.docker') }}
-        </t-menu-item>
         <t-menu-item value="/alerts">
           <template #icon><t-icon name="error-circle" /></template>
           {{ $t('menu.alerts') }}
@@ -87,9 +83,11 @@
           </t-dropdown>
         </div>
       </t-header>
-      <t-content class="main-content">
-        <router-view />
-      </t-content>
+      <t-layout style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+        <t-content class="main-content">
+          <router-view />
+        </t-content>
+      </t-layout>
     </t-layout>
   </t-layout>
 </template>
@@ -183,6 +181,8 @@ function onUserAction(data: any) {
   gap: 8px;
 }
 .main-content {
+  flex: 1;
+  min-height: 0;
   padding: 24px;
   overflow-y: auto;
   background: var(--td-bg-page-container);

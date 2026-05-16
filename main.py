@@ -10,7 +10,6 @@ from app.config import settings
 from app.database import engine, Base, async_session
 from app.core.logger import logger
 from app.core.ssh import ssh_pool
-from app.core.docker_client import docker_client
 
 # Import routers
 from app.routers.auth import router as auth_router, user_router
@@ -21,7 +20,6 @@ from app.routers.webssh import router as webssh_router
 from app.routers.permission import router as permission_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.monitor import router as monitor_router
-from app.routers.docker import router as docker_router
 from app.routers.audit import router as audit_router
 from app.routers.site_config import router as site_config_router
 from app.routers.sftp import router as sftp_router
@@ -119,7 +117,6 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
     await ssh_pool.close_all()
-    await docker_client.close()
     logger.info("Cleanup complete")
 
 
@@ -150,7 +147,6 @@ app.include_router(webssh_router, prefix="/api/v1")
 app.include_router(permission_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 app.include_router(monitor_router, prefix="/api/v1")
-app.include_router(docker_router, prefix="/api/v1")
 app.include_router(audit_router, prefix="/api/v1")
 app.include_router(site_config_router, prefix="/api/v1")
 app.include_router(sftp_router, prefix="/api/v1")

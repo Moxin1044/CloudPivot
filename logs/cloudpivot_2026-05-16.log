@@ -465,3 +465,1016 @@
 2026-05-16 20:25:45 | INFO     | main:lifespan:122 - Cleanup complete
 2026-05-16 20:25:45 | INFO     | main:lifespan:122 - Cleanup complete
 2026-05-16 20:25:45 | INFO     | main:lifespan:122 - Cleanup complete
+2026-05-16 20:38:36 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:38:36 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:38:36 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:38:36 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:38:36 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:38:36 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:38:36 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:38:36 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:38:36 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:38:37 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 20:38:37 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 20:38:38 | WARNING  | app.core.monitor_collector:_collect_host_metrics:86 - Failed to collect metrics from host 1 (10.0.8.35): SSH connection closed
+2026-05-16 20:38:38 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:38:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:38:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:38:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:39:40 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:39:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:39:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:39:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:40:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:40:43 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:40:43 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:40:43 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:41:26 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:41:26 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:41:26 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:41:26 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:41:26 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:41:26 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:41:26 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:41:26 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:41:30 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:41:30 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:41:30 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:41:30 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:41:30 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:41:30 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:41:30 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:41:30 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:74 - Failed to ensure default admin: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:41:30 | ERROR    | main:_ensure_default_admin:76 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 510, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 756, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 635, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 653, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.UndefinedColumnError: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/main.py", line 50, in _ensure_default_admin
+    result = await db.execute(
+             ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 461, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2362, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2247, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 305, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 941, in do_execute
+    cursor.execute(statement, parameters)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 568, in execute
+    self._adapt_connection.await_(
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 546, in _prepare_and_execute
+    self._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 497, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "/usr/local/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 780, in _handle_exception
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column users.token_version does not exist
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.display_name, users.avatar_url, users.role, users.status, users.mfa_secret, users.language, users.theme, users.notification_email, users.feishu_webhook, users.dingtalk_webhook, users.notify_channels, users.last_login_at, users.last_login_ip, users.token_version, users.created_at, users.updated_at 
+FROM users 
+WHERE users.role = $1::userrole]
+[parameters: ('admin',)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+
+2026-05-16 20:41:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 3 records for host 10.0.8.35
+2026-05-16 20:41:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 3 records for host 10.0.8.35
+2026-05-16 20:41:32 | WARNING  | app.core.monitor_collector:_collect_host_metrics:86 - Failed to collect metrics from host 1 (10.0.8.35): SSH connection closed
+2026-05-16 20:41:32 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:41:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 20:41:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 20:41:32 | WARNING  | app.core.monitor_collector:_collect_host_metrics:86 - Failed to collect metrics from host 1 (10.0.8.35): SSH connection closed
+2026-05-16 20:41:32 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:41:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:41:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:42:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:42:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:42:36 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:42:36 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:42:51 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:42:51 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:42:51 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:42:51 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:42:51 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:42:51 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:42:51 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:42:51 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:43:52 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:43:52 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:43:52 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:43:52 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:43:53 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:43:53 | INFO     | main:_ensure_default_admin:67 - Default admin created: admin / admin123
+2026-05-16 20:43:53 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 0 hosts
+2026-05-16 20:44:00 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:44:00 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:44:00 | INFO     | main:lifespan:82 - Starting CloudPivot in production mode
+2026-05-16 20:44:00 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:44:00 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:44:00 | INFO     | main:lifespan:88 - Database tables ensured
+2026-05-16 20:44:00 | INFO     | main:_ensure_default_admin:54 - Admin user already exists
+2026-05-16 20:44:00 | INFO     | main:_ensure_default_admin:54 - Admin user already exists
+2026-05-16 20:44:00 | INFO     | main:_ensure_default_admin:54 - Admin user already exists
+2026-05-16 20:44:00 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 0 hosts
+2026-05-16 20:44:00 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 0 hosts
+2026-05-16 20:44:00 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 0 hosts
+2026-05-16 20:44:56 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:45:02 | WARNING  | app.core.monitor_collector:_collect_host_metrics:86 - Failed to collect metrics from host 1 (10.0.8.35): SSH connection closed
+2026-05-16 20:45:02 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:45:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:45:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:45:11 | ERROR    | app.routers.webssh:read_ws:289 - stdin write error: utf_8_encode() argument 1 must be str, not bytes
+2026-05-16 20:45:15 | ERROR    | app.routers.webssh:read_ws:289 - stdin write error: utf_8_encode() argument 1 must be str, not bytes
+2026-05-16 20:45:58 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:46:04 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:46:05 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:46:05 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:46:34 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 81 records for host 10.0.8.35
+2026-05-16 20:47:00 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:06 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:07 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:07 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:32 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:47:32 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:47:32 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:47:32 | INFO     | main:lifespan:110 - Shutting down...
+2026-05-16 20:47:32 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:47:32 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:47:32 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:47:32 | INFO     | main:lifespan:123 - Cleanup complete
+2026-05-16 20:47:36 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:47:36 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:47:36 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:47:36 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:47:36 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 20:47:36 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 20:47:36 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 20:47:36 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 20:47:36 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 20:47:36 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 20:47:36 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 20:47:36 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 20:47:37 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 3 records for host 10.0.8.35
+2026-05-16 20:47:37 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 20:47:38 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:38 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:38 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:47:38 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 20:48:26 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 20:48:26 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 20:48:26 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 20:48:26 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 20:48:26 | INFO     | main:lifespan:120 - Cleanup complete
+2026-05-16 20:48:26 | INFO     | main:lifespan:120 - Cleanup complete
+2026-05-16 20:48:26 | INFO     | main:lifespan:120 - Cleanup complete
+2026-05-16 20:48:26 | INFO     | main:lifespan:120 - Cleanup complete
+2026-05-16 20:48:29 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:48:29 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 20:48:29 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode

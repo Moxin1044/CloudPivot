@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <t-row :gutter="[16, 16]">
-      <t-col :span="3" v-for="item in statCards" :key="item.key">
+      <t-col :span="4" v-for="item in statCards" :key="item.key">
         <t-card class="stat-card" :bordered="false">
           <div class="stat-content">
             <div class="stat-info">
@@ -79,9 +79,6 @@ function updateStatCards() {
     { key: 'totalHosts', value: o.total_hosts || 0, icon: 'server', color: '#0052d9' },
     { key: 'onlineHosts', value: o.online_hosts || 0, icon: 'check-circle', color: '#00a870' },
     { key: 'activeSessions', value: o.active_sessions || 0, icon: 'root-list', color: '#e37318' },
-    { key: 'totalContainers', value: o.total_containers || 0, icon: 'control-platform', color: '#8c5fe0' },
-    { key: 'runningContainers', value: o.running_containers || 0, icon: 'play-circle', color: '#0594fa' },
-    { key: 'totalUsers', value: o.total_users || 0, icon: 'usergroup', color: '#d54941' },
     { key: 'activeAlerts', value: o.active_alerts || 0, icon: 'error-circle', color: '#e34d59' },
     { key: 'riskCommandsToday', value: o.risk_commands_today || 0, icon: 'close-circle', color: '#c9353f' },
   ];

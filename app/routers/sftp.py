@@ -68,7 +68,6 @@ async def list_directory(
                 raise HTTPException(status_code=400, detail=f"Cannot list directory: {str(e)}")
 
             files: List[FileItem] = []
-            # Sort: directories first, then files, both alphabetically
             dir_entries = []
             file_entries = []
             for entry in entries:
@@ -91,8 +90,25 @@ async def list_directory(
                     # Skip entries we can't stat
                     pass
 
-            files = dir_entries + file_entries
-            return ListResponse(path=path, files=files)
+            # Sort: .. first (if not at root), then other dirs alphabetically, then files alphabetically
+            parent_entry = None
+            other_dir_entries = []
+            for item in dir_entries:
+                if item.name == '..':
+                    parent_entry = item
+                else:
+                    other_dir_entries.append(item)
+
+            other_dir_entries.sort(key=lambda x: x.name.lower())
+            file_entries.sort(key=lambda x: x.name.lower())
+
+            sorted_files: List[FileItem] = []
+            if parent_entry:
+                sorted_files.append(parent_entry)
+            sorted_files.extend(other_dir_entries)
+            sorted_files.extend(file_entries)
+
+            return ListResponse(path=path, files=sorted_files)
     finally:
         conn.close()
         await conn.wait_closed()

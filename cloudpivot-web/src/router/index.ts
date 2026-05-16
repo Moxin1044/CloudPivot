@@ -68,12 +68,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '主机监控', icon: 'chart-bar' },
       },
       {
-        path: 'docker',
-        name: 'Docker',
-        component: () => import('@/views/docker/index.vue'),
-        meta: { title: 'Docker', icon: 'container' },
-      },
-      {
         path: 'alerts',
         name: 'Alerts',
         component: () => import('@/views/alert/index.vue'),

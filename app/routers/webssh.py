@@ -110,7 +110,7 @@ async def websocket_ssh(
             return
 
         # Check session limit
-        if ws_manager.get_user_session_count(user_id) >= settings.WEBSSH_SSH_TIMEOUT:
+        if ws_manager.get_user_session_count(user_id) >= settings.WEBSSH_MAX_SESSIONS_PER_USER:
             await websocket.close(code=4005, reason="Max sessions reached")
             return
 
@@ -159,207 +159,194 @@ async def websocket_ssh(
         )
         ws_manager.add_session(webssh_session)
 
-                # Start shell
-                term_type = "xterm-256color"
-                term_size = (80, 24)
-                process = None
+    # Start shell
+    term_type = "xterm-256color"
+    term_size = (80, 24)
+    process = None
+    try:
+        process = await ssh_conn.create_process(
+            term_type=term_type,
+            term_size=term_size,
+        )
+        webssh_session.ssh_writer = process.stdin
+        webssh_session.ssh_reader = process.stdout
+
+        # Send connected message
+        await websocket.send_json({
+            "type": "connected",
+            "session_id": session_id,
+            "host": host.ip_address,
+            "username": host.username,
+        })
+
+        # Use a single event loop to avoid race conditions on stdin/stdout
+        cmd_buffer = ""
+        closed = False
+
+        async def read_ssh():
+            try:
+                data = await process.stdout.read(4096)
+                if not data:
+                    return "ssh_closed"
+                if isinstance(data, str):
+                    await websocket.send_text(data)
+                else:
+                    await websocket.send_bytes(data)
+                return None
+            except Exception as e:
+                logger.error(f"read_ssh error: {e}")
+                return "ssh_error"
+
+        async def read_ws():
+            nonlocal cmd_buffer
+            try:
+                data = await websocket.receive_text()
+            except WebSocketDisconnect:
+                return "ws_closed"
+            except Exception as e:
+                logger.error(f"read_ws receive error: {e}")
+                return "ws_error"
+
+            try:
+                msg = json.loads(data)
+            except json.JSONDecodeError:
+                # Non-JSON: forward raw
                 try:
-                    process = await ssh_conn.create_process(
-                        term_type=term_type,
-                        term_size=term_size,
-                    )
-                    webssh_session.ssh_writer = process.stdin
-                    webssh_session.ssh_reader = process.stdout
-
-                    # Send connected message
-                    await websocket.send_json({
-                        "type": "connected",
-                        "session_id": session_id,
-                        "host": host.ip_address,
-                        "username": host.username,
-                    })
-
-                    # Use a single event loop to avoid race conditions on stdin/stdout
-                    cmd_buffer = ""
-                    closed = False
-
-                    while not closed:
-                        try:
-                            # Use asyncio.wait on both streams simultaneously
-                            tasks = []
-                            read_ssh_task = None
-                            read_ws_task = None
-
-                            async def read_ssh():
-                                try:
-                                    data = await process.stdout.read(4096)
-                                    if not data:
-                                        return "ssh_closed"
-                                    if isinstance(data, str):
-                                        await websocket.send_text(data)
-                                    else:
-                                        await websocket.send_bytes(data)
-                                    return None
-                                except Exception as e:
-                                    logger.error(f"read_ssh error: {e}")
-                                    return "ssh_error"
-
-                            async def read_ws():
-                                nonlocal cmd_buffer
-                                try:
-                                    data = await websocket.receive_text()
-                                except WebSocketDisconnect:
-                                    return "ws_closed"
-                                except Exception as e:
-                                    logger.error(f"read_ws receive error: {e}")
-                                    return "ws_error"
-
-                                try:
-                                    msg = json.loads(data)
-                                except json.JSONDecodeError:
-                                    # Non-JSON: forward raw
-                                    try:
-                                        process.stdin.write(data.encode("utf-8"))
-                                        await process.stdin.drain()
-                                    except Exception as e:
-                                        logger.error(f"stdin write error: {e}")
-                                        return "ssh_error"
-                                    return None
-
-                                msg_type = msg.get("type", "input")
-
-                                if msg_type == "input":
-                                    char = msg.get("data", "")
-                                    if not char:
-                                        return None
-
-                                    if char == "\r" or char == "\n":
-                                        command = cmd_buffer.strip()
-                                        cmd_buffer = ""
-                                        if command:
-                                            perm_result = await db.execute(
-                                                select(HostPermission).where(
-                                                    HostPermission.host_id == host_id,
-                                                    HostPermission.is_active == True,
-                                                ).limit(1)
-                                            )
-                                            perm = perm_result.scalar_one_or_none()
-
-                                            blocked = False
-                                            risk = RiskLevel.safe
-                                            if perm:
-                                                allowed, risk = check_permission_level(perm, command)
-                                                if not allowed:
-                                                    blocked = True
-                                                    process.stdin.write(b"\x03")
-                                                    await process.stdin.drain()
-                                                    await websocket.send_json({
-                                                        "type": "blocked",
-                                                        "command": command,
-                                                        "risk": risk.value,
-                                                        "message": f"Command blocked (risk: {risk.value})",
-                                                    })
-                                                    db.add(SessionCommand(
-                                                        session_id=ssh_session.id,
-                                                        command=command,
-                                                        risk_level=risk,
-                                                        is_blocked=True,
-                                                    ))
-                                                    await db.commit()
-
-                                            if not blocked:
-                                                risk = check_command_risk(command)
-                                                db.add(SessionCommand(
-                                                    session_id=ssh_session.id,
-                                                    command=command,
-                                                    risk_level=risk,
-                                                    is_blocked=False,
-                                                ))
-                                                await db.commit()
-                                                process.stdin.write(char.encode("utf-8"))
-                                                await process.stdin.drain()
-                                        else:
-                                            process.stdin.write(char.encode("utf-8"))
-                                            await process.stdin.drain()
-
-                                    elif char == "\x7f" or char == "\b":
-                                        cmd_buffer = cmd_buffer[:-1]
-                                        process.stdin.write(b"\x7f")
-                                        await process.stdin.drain()
-
-                                    elif char == "\x03":
-                                        cmd_buffer = ""
-                                        process.stdin.write(b"\x03")
-                                        await process.stdin.drain()
-
-                                    else:
-                                        if len(char) == 1 and char.isprintable():
-                                            cmd_buffer += char
-                                        try:
-                                            process.stdin.write(char.encode("utf-8"))
-                                            await process.stdin.drain()
-                                        except Exception as e:
-                                            logger.error(f"stdin write error: {e}")
-                                            return "ssh_error"
-
-                                elif msg_type == "resize":
-                                    cols = msg.get("cols", 80)
-                                    rows = msg.get("rows", 24)
-                                    process.resize(cols, rows)
-
-                                elif msg_type == "ping":
-                                    await websocket.send_json({"type": "pong"})
-
-                                return None
-
-                            # Poll both streams
-                            while not closed:
-                                tasks = []
-                                tasks.append(asyncio.create_task(read_ssh()))
-                                tasks.append(asyncio.create_task(read_ws()))
-
-                                done, pending = await asyncio.wait(
-                                    tasks, return_when=asyncio.FIRST_COMPLETED
-                                )
-                                for t in pending:
-                                    t.cancel()
-                                for t in done:
-                                    result = t.result()
-                                    if result in ("ssh_closed", "ssh_error", "ws_closed", "ws_error"):
-                                        closed = True
-                                        break
-
+                    process.stdin.write(data.encode("utf-8"))
+                    await process.stdin.drain()
                 except Exception as e:
-                    logger.error(f"WebSSH error: {e}", exc_info=True)
-                finally:
-                    # Update session
-                    try:
-                        ssh_session.status = SessionStatus.closed
-                        ssh_session.ended_at = datetime.now(timezone.utc)
-                        if ssh_session.started_at:
-                            duration = (ssh_session.ended_at - ssh_session.started_at).total_seconds()
-                            ssh_session.duration_seconds = int(duration)
-                        await db.flush()
-                        await db.commit()
-                    except Exception:
-                        pass
+                    logger.error(f"stdin write error: {e}")
+                    return "ssh_error"
+                return None
 
-                    ws_manager.remove_session(session_id)
-                    try:
-                        if process and not process.stdin.is_closing():
-                            process.stdin.close()
+            msg_type = msg.get("type", "input")
+
+            if msg_type == "input":
+                char = msg.get("data", "")
+                if not char:
+                    return None
+
+                if char == "\r" or char == "\n":
+                    command = cmd_buffer.strip()
+                    cmd_buffer = ""
+                    if command:
+                        perm_result = await db.execute(
+                            select(HostPermission).where(
+                                HostPermission.host_id == host_id,
+                                HostPermission.is_active == True,
+                            ).limit(1)
+                        )
+                        perm = perm_result.scalar_one_or_none()
+
+                        blocked = False
+                        risk = RiskLevel.safe
+                        if perm:
+                            allowed, risk = check_permission_level(perm, command)
+                            if not allowed:
+                                blocked = True
+                                process.stdin.write(b"\x03")
+                                await process.stdin.drain()
+                                await websocket.send_json({
+                                    "type": "blocked",
+                                    "command": command,
+                                    "risk": risk.value,
+                                    "message": f"Command blocked (risk: {risk.value})",
+                                })
+                                db.add(SessionCommand(
+                                    session_id=ssh_session.id,
+                                    command=command,
+                                    risk_level=risk,
+                                    is_blocked=True,
+                                ))
+                                await db.commit()
+
+                        if not blocked:
+                            risk = check_command_risk(command)
+                            db.add(SessionCommand(
+                                session_id=ssh_session.id,
+                                command=command,
+                                risk_level=risk,
+                                is_blocked=False,
+                            ))
+                            await db.commit()
+                            process.stdin.write(char.encode("utf-8"))
                             await process.stdin.drain()
-                    except Exception:
-                        pass
+                elif char == "\x7f" or char == "\b":
+                    cmd_buffer = cmd_buffer[:-1]
+                    process.stdin.write(b"\x7f")
+                    await process.stdin.drain()
+                elif char == "\x03":
+                    cmd_buffer = ""
+                    process.stdin.write(b"\x03")
+                    await process.stdin.drain()
+                else:
+                    if len(char) == 1 and char.isprintable():
+                        cmd_buffer += char
                     try:
-                        ssh_conn.close()
-                        await ssh_conn.wait_closed()
-                    except Exception:
-                        pass
-                    try:
-                        await websocket.close()
-                    except Exception:
-                        pass
+                        process.stdin.write(char.encode("utf-8"))
+                        await process.stdin.drain()
+                    except Exception as e:
+                        logger.error(f"stdin write error: {e}")
+                        return "ssh_error"
+
+            elif msg_type == "resize":
+                cols = msg.get("cols", 80)
+                rows = msg.get("rows", 24)
+                process.resize(cols, rows)
+
+            elif msg_type == "ping":
+                await websocket.send_json({"type": "pong"})
+
+            return None
+
+        # Poll both streams
+        while not closed:
+            tasks = []
+            tasks.append(asyncio.create_task(read_ssh()))
+            tasks.append(asyncio.create_task(read_ws()))
+
+            done, pending = await asyncio.wait(
+                tasks, return_when=asyncio.FIRST_COMPLETED
+            )
+            for t in pending:
+                t.cancel()
+            for t in done:
+                result = t.result()
+                if result in ("ssh_closed", "ssh_error", "ws_closed", "ws_error"):
+                    closed = True
+                    break
+
+    except Exception as e:
+        logger.error(f"WebSSH error: {e}", exc_info=True)
+    finally:
+        # Update session
+        try:
+            ssh_session.status = SessionStatus.closed
+            ssh_session.ended_at = datetime.now(timezone.utc)
+            if ssh_session.started_at:
+                duration = (ssh_session.ended_at - ssh_session.started_at).total_seconds()
+                ssh_session.duration_seconds = int(duration)
+            await db.flush()
+            await db.commit()
+        except Exception:
+            pass
+
+        ws_manager.remove_session(session_id)
+        try:
+            if process and not process.stdin.is_closing():
+                process.stdin.close()
+                await process.stdin.drain()
+        except Exception:
+            pass
+        try:
+            ssh_conn.close()
+            await ssh_conn.wait_closed()
+        except Exception:
+            pass
+        try:
+            await websocket.close()
+        except Exception:
+            pass
 
 
 @router.get("/sessions", summary="获取会话列表")
