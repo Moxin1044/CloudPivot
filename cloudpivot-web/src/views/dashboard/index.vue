@@ -20,13 +20,13 @@
       <t-col :span="8">
         <t-card :title="$t('dashboard.resourceUsage')" :bordered="false">
           <div ref="chartRef" style="height: 300px"></div>
-          <t-empty v-if="!data.resourceUsage?.length" style="padding: 40px 0" />
+          <t-empty v-if="!data.resource_usage?.length" style="padding: 40px 0" />
         </t-card>
       </t-col>
       <t-col :span="4">
         <t-card :title="$t('dashboard.recentAlerts')" :bordered="false">
           <t-list :split="true">
-            <t-list-item v-for="alert in data.recentAlerts" :key="alert.id">
+            <t-list-item v-for="alert in data.recent_alerts" :key="alert.id">
               <t-list-item-meta
                 :title="alert.title"
                 :description="formatTime(alert.created_at)"
@@ -38,7 +38,7 @@
               </template>
             </t-list-item>
           </t-list>
-          <t-empty v-if="!data.recentAlerts?.length" />
+          <t-empty v-if="!data.recent_alerts?.length" />
         </t-card>
       </t-col>
     </t-row>
@@ -47,7 +47,7 @@
       <t-col :span="12">
         <t-card :title="$t('dashboard.recentAudits')" :bordered="false">
           <t-table
-            :data="data.recentAudits"
+            :data="data.recent_audits"
             :columns="auditColumns"
             size="small"
             :pagination="false"
@@ -67,7 +67,7 @@ import dayjs from 'dayjs';
 
 const { t } = useI18n();
 
-const data = ref<any>({ overview: {}, resourceUsage: [], recentAudits: [], recentAlerts: [] });
+const data = ref<any>({ overview: {}, resource_usage: [], recent_audits: [], recent_alerts: [] });
 const chartRef = ref<HTMLElement>();
 let chart: echarts.ECharts | null = null;
 
@@ -107,7 +107,7 @@ function severityTheme(s: string) {
 
 function updateResourceChart() {
   if (!chart) return;
-  const usage = data.value.resourceUsage || [];
+  const usage = data.value.resource_usage || [];
   if (!usage.length) {
     chart.clear();
     return;
@@ -120,9 +120,9 @@ function updateResourceChart() {
     xAxis: { type: 'category', data: hosts, axisLabel: { fontSize: 11, rotate: hosts.length > 5 ? 20 : 0 } },
     yAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%', fontSize: 11 } },
     series: [
-      { name: 'CPU%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.cpu_percent?.toFixed(1) ?? 0), itemStyle: { color: '#0052d9' } },
-      { name: 'Memory%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.memory_percent?.toFixed(1) ?? 0), itemStyle: { color: '#e37318' } },
-      { name: 'Disk%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.disk_percent?.toFixed(1) ?? 0), itemStyle: { color: '#8c5fe0' } },
+      { name: 'CPU%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => Number(u.cpu_percent?.toFixed(1) ?? 0)), itemStyle: { color: '#0052d9' } },
+      { name: 'Memory%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => Number(u.memory_percent?.toFixed(1) ?? 0)), itemStyle: { color: '#e37318' } },
+      { name: 'Disk%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => Number(u.disk_percent?.toFixed(1) ?? 0)), itemStyle: { color: '#8c5fe0' } },
     ],
   }, true);
 }

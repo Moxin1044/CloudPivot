@@ -195,7 +195,6 @@ async def websocket_ssh(
                 # Read from WebSocket and forward to SSH
                 async def read_ws():
                     cmd_buffer = ""
-                    line_buffer = ""  # Track what's been sent to SSH for current line
                     try:
                         while True:
                             data = await websocket.receive_text()
@@ -205,12 +204,14 @@ async def websocket_ssh(
 
                                 if msg_type == "input":
                                     char = msg.get("data", "")
+                                    if not char:
+                                        continue
 
                                     if char == "\r" or char == "\n":
-                                        # Enter: check permission before sending
+                                        # Enter: check permission BEFORE sending to SSH
                                         command = cmd_buffer.strip()
+                                        cmd_buffer = ""
                                         if command:
-                                            # Check permission and risk
                                             perm_result = await db.execute(
                                                 select(HostPermission).where(
                                                     HostPermission.host_id == host_id,
@@ -219,10 +220,12 @@ async def websocket_ssh(
                                             )
                                             perm = perm_result.scalar_one_or_none()
 
+                                            blocked = False
                                             if perm:
                                                 allowed, risk = check_permission_level(perm, command)
                                                 if not allowed:
-                                                    # Blocked: send Ctrl+C to cancel the line on SSH
+                                                    blocked = True
+                                                    # Send Ctrl+C to cancel the blocked command on SSH
                                                     process.stdin.write("\x03")
                                                     await process.stdin.drain()
                                                     await websocket.send_json({
@@ -239,46 +242,39 @@ async def websocket_ssh(
                                                     )
                                                     db.add(cmd_log)
                                                     await db.commit()
-                                                    cmd_buffer = ""
-                                                    line_buffer = ""
-                                                    continue
 
-                                            # Log command
-                                            risk = check_command_risk(command)
-                                            cmd_log = SessionCommand(
-                                                session_id=ssh_session.id,
-                                                command=command,
-                                                risk_level=risk,
-                                                is_blocked=False,
-                                            )
-                                            db.add(cmd_log)
-                                            await db.commit()
-
-                                        # Send enter to SSH
-                                        process.stdin.write(char)
-                                        await process.stdin.drain()
-                                        cmd_buffer = ""
-                                        line_buffer = ""
+                                            if not blocked:
+                                                risk = check_command_risk(command)
+                                                cmd_log = SessionCommand(
+                                                    session_id=ssh_session.id,
+                                                    command=command,
+                                                    risk_level=risk,
+                                                    is_blocked=False,
+                                                )
+                                                db.add(cmd_log)
+                                                await db.commit()
+                                                # Send enter to execute
+                                                process.stdin.write(char)
+                                                await process.stdin.drain()
+                                        else:
+                                            process.stdin.write(char)
+                                            await process.stdin.drain()
 
                                     elif char == "\x7f" or char == "\b":
-                                        # Backspace: remove last char from buffer, send to SSH
                                         cmd_buffer = cmd_buffer[:-1]
-                                        line_buffer = line_buffer[:-1]
                                         process.stdin.write(char)
                                         await process.stdin.drain()
 
                                     elif char == "\x03":
-                                        # Ctrl+C: clear buffer, send to SSH
                                         cmd_buffer = ""
-                                        line_buffer = ""
                                         process.stdin.write(char)
                                         await process.stdin.drain()
 
                                     else:
-                                        # Normal char: accumulate in buffer and send to SSH
+                                        # Normal char: send to SSH immediately for echo,
+                                        # accumulate in buffer for permission check on enter
                                         if len(char) == 1 and char.isprintable():
                                             cmd_buffer += char
-                                        line_buffer += char
                                         process.stdin.write(char)
                                         await process.stdin.drain()
 
@@ -291,12 +287,14 @@ async def websocket_ssh(
                                     await websocket.send_json({"type": "pong"})
 
                             except json.JSONDecodeError:
+                                # Non-JSON data: forward raw to SSH
                                 process.stdin.write(data)
                                 await process.stdin.drain()
+
                     except WebSocketDisconnect:
                         pass
                     except Exception as e:
-                        logger.error(f"WebSSH read_ws error: {e}")
+                        logger.error(f"WebSSH read_ws error: {e}", exc_info=True)
 
                 # Run both tasks
                 read_task = asyncio.create_task(read_ssh())
