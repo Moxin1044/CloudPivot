@@ -195,6 +195,7 @@ async def websocket_ssh(
                 # Read from WebSocket and forward to SSH
                 async def read_ws():
                     cmd_buffer = ""
+                    line_buffer = ""  # Track what's been sent to SSH for current line
                     try:
                         while True:
                             data = await websocket.receive_text()
@@ -204,18 +205,10 @@ async def websocket_ssh(
 
                                 if msg_type == "input":
                                     char = msg.get("data", "")
-                                    # Send to SSH immediately (character by character)
-                                    process.stdin.write(char)
-                                    await process.stdin.drain()
 
-                                    # Accumulate command buffer until Enter (\r or \n)
-                                    if char == "\x7f" or char == "\b":
-                                        # Backspace: remove last char from buffer
-                                        cmd_buffer = cmd_buffer[:-1]
-                                    elif char == "\r" or char == "\n":
-                                        # Enter: log the complete command
+                                    if char == "\r" or char == "\n":
+                                        # Enter: check permission before sending
                                         command = cmd_buffer.strip()
-                                        cmd_buffer = ""
                                         if command:
                                             # Check permission and risk
                                             perm_result = await db.execute(
@@ -229,6 +222,9 @@ async def websocket_ssh(
                                             if perm:
                                                 allowed, risk = check_permission_level(perm, command)
                                                 if not allowed:
+                                                    # Blocked: send Ctrl+C to cancel the line on SSH
+                                                    process.stdin.write("\x03")
+                                                    await process.stdin.drain()
                                                     await websocket.send_json({
                                                         "type": "blocked",
                                                         "command": command,
@@ -243,6 +239,8 @@ async def websocket_ssh(
                                                     )
                                                     db.add(cmd_log)
                                                     await db.commit()
+                                                    cmd_buffer = ""
+                                                    line_buffer = ""
                                                     continue
 
                                             # Log command
@@ -255,12 +253,34 @@ async def websocket_ssh(
                                             )
                                             db.add(cmd_log)
                                             await db.commit()
-                                    elif char == "\x03":
-                                        # Ctrl+C: clear buffer
+
+                                        # Send enter to SSH
+                                        process.stdin.write(char)
+                                        await process.stdin.drain()
                                         cmd_buffer = ""
-                                    elif len(char) == 1 and char.isprintable():
-                                        # Normal printable char: add to buffer
-                                        cmd_buffer += char
+                                        line_buffer = ""
+
+                                    elif char == "\x7f" or char == "\b":
+                                        # Backspace: remove last char from buffer, send to SSH
+                                        cmd_buffer = cmd_buffer[:-1]
+                                        line_buffer = line_buffer[:-1]
+                                        process.stdin.write(char)
+                                        await process.stdin.drain()
+
+                                    elif char == "\x03":
+                                        # Ctrl+C: clear buffer, send to SSH
+                                        cmd_buffer = ""
+                                        line_buffer = ""
+                                        process.stdin.write(char)
+                                        await process.stdin.drain()
+
+                                    else:
+                                        # Normal char: accumulate in buffer and send to SSH
+                                        if len(char) == 1 and char.isprintable():
+                                            cmd_buffer += char
+                                        line_buffer += char
+                                        process.stdin.write(char)
+                                        await process.stdin.drain()
 
                                 elif msg_type == "resize":
                                     cols = msg.get("cols", 80)
