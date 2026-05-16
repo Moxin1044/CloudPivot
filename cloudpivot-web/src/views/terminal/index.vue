@@ -154,7 +154,7 @@ function connect() {
     tab.connected = true;
     tab.hostId = selectedHostId.value;
     const host = hostOptions.value.find(h => h.value === selectedHostId.value);
-    tab.label = host?.label || 'Terminal';
+    tab.label = host?.label || t('terminal.terminalLabel');
   };
 
   ws.onmessage = (event) => {

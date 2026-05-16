@@ -30,8 +30,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { auditApi } from '@/api';
 
+const { t } = useI18n();
 const activeTab = ref('sessions');
 const sessions = ref<any[]>([]);
 const commands = ref<any[]>([]);
@@ -43,29 +45,29 @@ const riskLoading = ref(false);
 const logLoading = ref(false);
 
 const sessionColumns = [
-  { colKey: 'session_id', title: 'Session ID', width: 200, ellipsis: true },
-  { colKey: 'client_ip', title: 'IP', width: 120 },
-  { colKey: 'status', title: '状态', width: 80 },
-  { colKey: 'started_at', title: '开始时间', width: 180 },
-  { colKey: 'ended_at', title: '结束时间', width: 180 },
-  { colKey: 'duration_seconds', title: '时长(s)', width: 80 },
+  { colKey: 'session_id', title: t('audit.sessionId'), width: 200, ellipsis: true },
+  { colKey: 'client_ip', title: t('audit.clientIp'), width: 120 },
+  { colKey: 'status', title: t('audit.status'), width: 80 },
+  { colKey: 'started_at', title: t('audit.startedAt'), width: 180 },
+  { colKey: 'ended_at', title: t('audit.endedAt'), width: 180 },
+  { colKey: 'duration_seconds', title: t('audit.duration'), width: 80 },
 ];
 
 const commandColumns = [
-  { colKey: 'command', title: '命令', ellipsis: true },
-  { colKey: 'risk_level', title: '风险', width: 80,
+  { colKey: 'command', title: t('audit.command'), ellipsis: true },
+  { colKey: 'risk_level', title: t('audit.riskLevel'), width: 80,
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.risk_level === 'danger' ? 'danger' : row.risk_level === 'warning' ? 'warning' : 'default', size: 'small' } }, row.risk_level)
   },
-  { colKey: 'is_blocked', title: '拦截', width: 60 },
-  { colKey: 'executed_at', title: '时间', width: 180 },
+  { colKey: 'is_blocked', title: t('audit.isBlocked'), width: 60 },
+  { colKey: 'executed_at', title: t('audit.executedAt'), width: 180 },
 ];
 
 const loginColumns = [
-  { colKey: 'username', title: '用户', width: 100 },
-  { colKey: 'login_ip', title: 'IP', width: 120 },
-  { colKey: 'is_success', title: '成功', width: 60 },
-  { colKey: 'login_method', title: '方式', width: 80 },
-  { colKey: 'login_at', title: '时间', width: 180 },
+  { colKey: 'username', title: t('audit.username'), width: 100 },
+  { colKey: 'login_ip', title: t('audit.loginIp'), width: 120 },
+  { colKey: 'is_success', title: t('audit.success'), width: 60 },
+  { colKey: 'login_method', title: t('audit.method'), width: 80 },
+  { colKey: 'login_at', title: t('audit.loginAt'), width: 180 },
 ];
 
 async function loadData() {

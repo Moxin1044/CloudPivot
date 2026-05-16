@@ -92,6 +92,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useAppStore, useUserStore } from '@/stores/app';
 import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
@@ -111,8 +112,8 @@ const langOptions = [
 ];
 
 const userOptions = [
-  { content: '个人信息', value: 'profile' },
-  { content: '退出登录', value: 'logout' },
+  { content: t('settings.profile'), value: 'profile' },
+  { content: t('settings.logout'), value: 'logout' },
 ];
 
 function onMenuChange(value: string) {

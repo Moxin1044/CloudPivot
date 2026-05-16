@@ -70,8 +70,8 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { authApi } from '@/api';
 import { useUserStore } from '@/stores/app';
 
-const router = useRouter();
 const { t } = useI18n();
+const router = useRouter();
 const userStore = useUserStore();
 const loading = ref(false);
 const showRegister = ref(false);
