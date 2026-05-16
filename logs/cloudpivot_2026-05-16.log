@@ -85,3 +85,86 @@
 2026-05-16 19:38:31 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
 2026-05-16 19:38:31 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
 2026-05-16 19:38:31 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:38:31 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:38:31 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:38:31 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:38:31 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:38:31 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:38:32 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:38:32 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:38:32 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:38:32 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 1 records for host 10.0.8.35
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 1 records for host 10.0.8.35
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 1 records for host 10.0.8.35
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 1 records for host 10.0.8.35
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:38:32 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:38:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:38:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:38:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:38:34 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:39:37 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:39:37 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:39:37 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:39:37 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:40:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:40:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:40:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:40:39 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:41:40 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:41:40 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:41:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:41:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:42:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:42:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:42:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:42:42 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:43:33 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:43:45 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:43:45 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:43:45 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:43:45 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:44:47 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:44:47 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:44:47 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:44:47 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:45:49 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:45:49 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:45:49 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:45:49 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:46:51 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:46:51 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:46:51 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:46:51 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:47:53 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:47:53 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:47:53 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:47:53 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:48:33 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 1 records for host 10.0.8.35
+2026-05-16 19:48:33 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:48:58 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:48:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:48:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:48:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:50:00 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:50:01 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:50:01 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:50:01 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:51:02 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:51:02 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:51:02 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:51:02 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:52:04 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:52:04 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:52:04 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:52:04 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts

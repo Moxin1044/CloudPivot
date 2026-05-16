@@ -65,7 +65,11 @@
           <template #actions>
             <t-button theme="primary" @click="showRuleCreate = true">{{ $t('monitor.createRule') }}</t-button>
           </template>
-          <t-table :data="rules" :columns="ruleColumns" :loading="rulesLoading" row-key="id" size="small" />
+          <t-table :data="rules" :columns="ruleColumns" :loading="rulesLoading" row-key="id" size="small">
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="danger" size="small" @click="onDeleteRule(row.id)">{{ $t('common.delete') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
     </t-tabs>

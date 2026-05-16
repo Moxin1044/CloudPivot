@@ -7,7 +7,14 @@
           {{ $t('common.create') }}
         </t-button>
       </template>
-      <t-table :data="teams" :columns="columns" :loading="loading" row-key="id" />
+      <t-table :data="teams" :columns="columns" :loading="loading" row-key="id">
+        <template #actions="{ row }">
+          <t-space>
+            <t-button variant="outline" theme="primary" size="small" @click="viewMembers(row.id)">{{ $t('team.memberBtn') }}</t-button>
+            <t-button variant="outline" theme="danger" size="small" @click="onDelete(row.id)">{{ $t('common.delete') }}</t-button>
+          </t-space>
+        </template>
+      </t-table>
     </t-card>
 
     <t-dialog v-model:visible="showCreate" :header="$t('team.createTeam')" @confirm="onCreate">
@@ -38,12 +45,7 @@ const columns = [
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.is_active ? 'success' : 'danger', size: 'small' } }, row.is_active ? t('common.enabled') : t('common.disabled'))
   },
   { colKey: 'created_at', title: t('common.createdAt') },
-  { colKey: 'actions', title: t('common.actions'), width: 180,
-    cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:8px' }, [
-      _h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => viewMembers(row.id) }, t('team.memberBtn')),
-      _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('common.delete')),
-    ])
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 180 },
 ];
 
 async function loadData() {

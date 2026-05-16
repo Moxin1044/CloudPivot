@@ -4,7 +4,14 @@
       <template #actions>
         <t-select v-model="filterStatus" :options="statusOptions" style="width:120px" @change="loadData" />
       </template>
-      <t-table :data="alerts" :columns="columns" :loading="loading" row-key="id" />
+      <t-table :data="alerts" :columns="columns" :loading="loading" row-key="id">
+        <template #actions="{ row }">
+          <t-space>
+            <t-button v-if="row.status === 'pending'" variant="outline" theme="primary" size="small" @click="onAck(row.id)">{{ $t('alert.ackBtn') }}</t-button>
+            <t-button v-if="row.status !== 'resolved'" variant="outline" theme="success" size="small" @click="onResolve(row.id)">{{ $t('alert.resolveBtn') }}</t-button>
+          </t-space>
+        </template>
+      </t-table>
     </t-card>
   </div>
 </template>
@@ -38,12 +45,7 @@ const columns = [
   },
   { colKey: 'message', title: t('alert.messageLabel'), ellipsis: true },
   { colKey: 'created_at', title: t('alert.timeLabel'), width: 180 },
-  { colKey: 'actions', title: t('common.actions'), width: 180,
-    cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:8px' }, [
-      row.status === 'pending' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => onAck(row.id) }, t('alert.ackBtn')) : null,
-      row.status !== 'resolved' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'success', onClick: () => onResolve(row.id) }, t('alert.resolveBtn')) : null,
-    ].filter(Boolean))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 180 },
 ];
 
 async function loadData() {

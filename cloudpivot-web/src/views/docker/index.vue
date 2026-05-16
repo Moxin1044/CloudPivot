@@ -12,7 +12,18 @@
               <template #icon><t-icon name="refresh" /></template>
             </t-button>
           </template>
-          <t-table :data="containers" :columns="containerColumns" :loading="loading" row-key="id" />
+          <t-table :data="containers" :columns="containerColumns" :loading="loading" row-key="id">
+            <template #actions="{ row }">
+              <t-space>
+                <t-button v-if="row.state !== 'running'" variant="outline" theme="primary" size="small" @click="onStart(row.id)">{{ $t('docker.start') }}</t-button>
+                <t-button v-if="row.state === 'running'" variant="outline" theme="warning" size="small" @click="onStop(row.id)">{{ $t('docker.stop') }}</t-button>
+                <t-button variant="outline" theme="primary" size="small" @click="onRestart(row.id)">{{ $t('docker.restart') }}</t-button>
+                <t-button variant="outline" size="small" @click="onViewLogs(row.id)">{{ $t('docker.logs') }}</t-button>
+                <t-button variant="outline" size="small" @click="execContainerId = row.id; showExec = true">{{ $t('docker.exec') }}</t-button>
+                <t-button variant="outline" theme="danger" size="small" @click="onRemove(row.id)">{{ $t('common.delete') }}</t-button>
+              </t-space>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="images" :label="$t('docker.images')">
@@ -23,7 +34,11 @@
               <template #icon><t-icon name="refresh" /></template>
             </t-button>
           </template>
-          <t-table :data="images" :columns="imageColumns" :loading="imgLoading" row-key="id" />
+          <t-table :data="images" :columns="imageColumns" :loading="imgLoading" row-key="id">
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="danger" size="small" @click="onRemoveImage(row.id)">{{ $t('common.delete') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="hosts" :label="$t('docker.host')">
@@ -31,7 +46,11 @@
           <template #actions>
             <t-button theme="primary" @click="showHostCreate = true">{{ $t('common.create') }}</t-button>
           </template>
-          <t-table :data="dockerHosts" :columns="hostColumns" :loading="hostLoading" row-key="id" />
+          <t-table :data="dockerHosts" :columns="hostColumns" :loading="hostLoading" row-key="id">
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="danger" size="small" @click="onDeleteHost(row.id)">{{ $t('common.delete') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
     </t-tabs>
@@ -99,16 +118,7 @@ const containerColumns = [
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.state === 'running' ? 'success' : 'default', size: 'small' } }, row.state)
   },
   { colKey: 'status', title: t('docker.detail'), width: 150 },
-  { colKey: 'actions', title: t('common.actions'), width: 340,
-    cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:4px;flex-wrap:wrap' }, [
-      row.state !== 'running' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => onStart(row.id) }, t('docker.start')) : null,
-      row.state === 'running' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'warning', onClick: () => onStop(row.id) }, t('docker.stop')) : null,
-      _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => onRestart(row.id) }, t('docker.restart')),
-      _h('t-button', { size: 'small', variant: 'outline', onClick: () => onViewLogs(row.id) }, t('docker.logs')),
-      _h('t-button', { size: 'small', variant: 'outline', onClick: () => { execContainerId.value = row.id; showExec.value = true; } }, t('docker.exec')),
-      _h('t-button', { size: 'small', variant: 'outline', theme: 'danger', onClick: () => onRemove(row.id) }, t('common.delete')),
-    ].filter(Boolean))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 340 },
 ];
 
 const imageColumns = [
@@ -117,18 +127,14 @@ const imageColumns = [
     cell: (h: any, { row }: any) => h('span', (row.repo_tags || []).join(', '))
   },
   { colKey: 'size_mb', title: t('docker.sizeMB'), width: 100 },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'danger', onClick: () => onRemoveImage(row.id) }, t('common.delete'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 const hostColumns = [
   { colKey: 'name', title: t('common.name') },
   { colKey: 'host', title: t('docker.address') },
   { colKey: 'is_active', title: t('common.status') },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDeleteHost(row.id) }, t('common.delete'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 async function loadContainers() {

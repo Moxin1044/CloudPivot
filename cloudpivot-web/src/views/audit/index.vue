@@ -15,7 +15,11 @@
             row-key="id"
             :pagination="sessionPagination"
             @page-change="onSessionPageChange"
-          />
+          >
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="primary" size="small" @click="viewSession(row.id)">{{ $t('common.detail') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="commands" :label="$t('audit.commands')">
@@ -35,7 +39,11 @@
             row-key="id"
             :pagination="commandPagination"
             @page-change="onCommandPageChange"
-          />
+          >
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="primary" size="small" @click="viewCommand(row.id)">{{ $t('common.detail') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="risk" :label="$t('audit.riskCommands')">
@@ -52,7 +60,11 @@
             row-key="id"
             :pagination="riskPagination"
             @page-change="onRiskPageChange"
-          />
+          >
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="primary" size="small" @click="viewCommand(row.id)">{{ $t('common.detail') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="loginLogs" :label="$t('audit.loginLogs')">
@@ -69,7 +81,11 @@
             row-key="id"
             :pagination="logPagination"
             @page-change="onLogPageChange"
-          />
+          >
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="primary" size="small" @click="viewLogin(row.id)">{{ $t('common.detail') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="sshLoginLogs" label="SSH登录分析">
@@ -115,9 +131,7 @@ const sessionColumns = [
   { colKey: 'started_at', title: t('audit.startedAt'), width: 180 },
   { colKey: 'ended_at', title: t('audit.endedAt'), width: 180 },
   { colKey: 'duration_seconds', title: t('audit.duration'), width: 80 },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewSession(row.id) }, t('common.detail'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 const commandColumns = [
@@ -127,9 +141,7 @@ const commandColumns = [
   },
   { colKey: 'is_blocked', title: t('audit.isBlocked'), width: 60 },
   { colKey: 'executed_at', title: t('audit.executedAt'), width: 180 },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewCommand(row.id) }, t('common.detail'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 const loginColumns = [
@@ -138,9 +150,7 @@ const loginColumns = [
   { colKey: 'is_success', title: t('audit.success'), width: 60 },
   { colKey: 'login_method', title: t('audit.method'), width: 80 },
   { colKey: 'login_at', title: t('audit.loginAt'), width: 180 },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewLogin(row.id) }, t('common.detail'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 async function loadData() {

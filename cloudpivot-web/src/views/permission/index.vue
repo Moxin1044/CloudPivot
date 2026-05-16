@@ -6,7 +6,11 @@
           <template #actions>
             <t-button theme="primary" @click="showCreate = true">{{ $t('common.create') }}</t-button>
           </template>
-          <t-table :data="permissions" :columns="permColumns" :loading="loading" row-key="id" />
+          <t-table :data="permissions" :columns="permColumns" :loading="loading" row-key="id">
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="danger" size="small" @click="onDeletePerm(row.id)">{{ $t('common.delete') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
       <t-tab-panel value="temporary" :label="$t('permission.temporaryAuth')">
@@ -14,7 +18,11 @@
           <template #actions>
             <t-button theme="primary" @click="showTempCreate = true">{{ $t('common.create') }}</t-button>
           </template>
-          <t-table :data="tempPerms" :columns="tempColumns" :loading="tempLoading" row-key="id" />
+          <t-table :data="tempPerms" :columns="tempColumns" :loading="tempLoading" row-key="id">
+            <template #actions="{ row }">
+              <t-button variant="outline" theme="danger" size="small" @click="onRevokeTemp(row.id)">{{ $t('permission.revokeBtn') }}</t-button>
+            </template>
+          </t-table>
         </t-card>
       </t-tab-panel>
     </t-tabs>
@@ -84,9 +92,7 @@ const permColumns = [
   { colKey: 'can_download', title: t('permission.canDownload') },
   { colKey: 'can_execute', title: t('permission.canExecute') },
   { colKey: 'is_active', title: t('common.status') },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDeletePerm(row.id) }, t('common.delete'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 const tempColumns = [
@@ -96,9 +102,7 @@ const tempColumns = [
   { colKey: 'permission_level', title: t('permission.level') },
   { colKey: 'expires_at', title: t('permission.expiresAt') },
   { colKey: 'is_revoked', title: t('permission.revoked') },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onRevokeTemp(row.id) }, t('permission.revokeBtn'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 async function loadData() {
