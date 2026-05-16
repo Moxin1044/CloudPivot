@@ -55,7 +55,22 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = info;
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      // Notify backend to blacklist token
+      await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      });
+    } catch {
+      // Ignore network errors during logout
+    }
+    clearAuth();
+  }
+
+  function clearAuth() {
     token.value = '';
     refreshToken.value = '';
     userInfo.value = null;
@@ -64,5 +79,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('userInfo');
   }
 
-  return { token, refreshToken, userInfo, setTokens, setUser, logout };
+  return { token, refreshToken, userInfo, setTokens, setUser, logout, clearAuth };
 });

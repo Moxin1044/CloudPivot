@@ -8,6 +8,8 @@ from app.models.user import UserRole, UserStatus
 class LoginRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=64)
     password: str = Field(..., min_length=6, max_length=128)
+    captcha_id: Optional[str] = None
+    captcha_code: Optional[str] = None
 
 
 class RegisterRequest(BaseModel):

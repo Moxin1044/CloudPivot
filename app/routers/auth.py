@@ -13,7 +13,10 @@ from app.schemas.user import (
 from app.core.security import (
     hash_password, verify_password, create_access_token,
     create_refresh_token, decode_token,
+    blacklist_token, is_token_blacklisted,
+    check_login_attempts, record_login_attempt,
 )
+from app.routers.captcha import verify_captcha
 from app.dependencies import get_current_user, get_current_active_admin
 from app.config import settings
 from datetime import datetime, timezone
@@ -48,12 +51,28 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse, summary="用户登录")
 async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+
+    # Check login attempt limit (by username + IP)
+    attempt_key = f"{data.username}:{ip}"
+    if not check_login_attempts(attempt_key):
+        raise HTTPException(
+            status_code=429,
+            detail=f"Too many failed attempts. Please try again in {settings.LOGIN_LOCKOUT_MINUTES} minutes.",
+        )
+
+    # Verify captcha
+    if settings.CAPTCHA_ENABLED:
+        if not verify_captcha(data.captcha_id or "", data.captcha_code or ""):
+            record_login_attempt(attempt_key, False)
+            raise HTTPException(status_code=400, detail="Invalid captcha")
+
     result = await db.execute(select(User).where(User.username == data.username))
     user = result.scalar_one_or_none()
 
     login_log = LoginLog(
         username=data.username,
-        login_ip=request.client.host if request.client else None,
+        login_ip=ip,
         user_agent=request.headers.get("user-agent"),
         login_method="password",
     )
@@ -63,6 +82,7 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
         login_log.fail_reason = "Invalid credentials"
         db.add(login_log)
         await db.commit()
+        record_login_attempt(attempt_key, False)
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     if not user.is_active:
@@ -70,19 +90,27 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
         login_log.fail_reason = "Account disabled"
         db.add(login_log)
         await db.commit()
+        record_login_attempt(attempt_key, False)
         raise HTTPException(status_code=403, detail="Account is disabled")
 
     # Update login info
     user.last_login_at = datetime.now(timezone.utc)
-    user.last_login_ip = request.client.host if request.client else None
+    user.last_login_ip = ip
 
     login_log.user_id = user.id
     login_log.is_success = True
     db.add(login_log)
     await db.commit()
 
-    access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
+    record_login_attempt(attempt_key, True)
+    tv = user.token_version if hasattr(user, "token_version") else 1
+
+    access_token = create_access_token(
+        {"sub": str(user.id), "role": user.role.value}, token_version=tv
+    )
+    refresh_token = create_refresh_token(
+        {"sub": str(user.id)}, token_version=tv
+    )
 
     return TokenResponse(
         access_token=access_token,
@@ -93,6 +121,9 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
 
 @router.post("/refresh", response_model=TokenResponse, summary="刷新令牌")
 async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
+    if is_token_blacklisted(data.refresh_token):
+        raise HTTPException(status_code=401, detail="Token has been revoked")
+
     payload = decode_token(data.refresh_token)
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid refresh token")
@@ -103,14 +134,42 @@ async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(ge
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
 
-    access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
+    # Check token version matches current user version
+    token_ver = payload.get("ver", 1)
+    user_ver = user.token_version if hasattr(user, "token_version") else 1
+    if token_ver != user_ver:
+        raise HTTPException(status_code=401, detail="Token version mismatch, please re-login")
+
+    # Blacklist old refresh token (rotation)
+    old_exp = payload.get("exp", 0)
+    remaining = max(old_exp - int(datetime.now(timezone.utc).timestamp()), 0)
+    if remaining > 0:
+        blacklist_token(data.refresh_token, ttl_seconds=remaining)
+
+    tv = user.token_version if hasattr(user, "token_version") else 1
+    access_token = create_access_token(
+        {"sub": str(user.id), "role": user.role.value}, token_version=tv
+    )
+    refresh_token_new = create_refresh_token({"sub": str(user.id)}, token_version=tv)
 
     return TokenResponse(
         access_token=access_token,
-        refresh_token=refresh_token,
+        refresh_token=refresh_token_new,
         expires_in=settings.APP_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
+
+
+@router.post("/logout", summary="用户登出")
+async def logout(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+):
+    """Logout and blacklist the current access token."""
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "")
+    if token:
+        blacklist_token(token)
+    return {"message": "Logged out successfully"}
 
 
 # ===== User Management =====
@@ -164,6 +223,8 @@ async def change_password(
     if not verify_password(data.old_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Old password is incorrect")
     current_user.hashed_password = hash_password(data.new_password)
+    # Increment token version to invalidate all existing tokens
+    current_user.token_version = (current_user.token_version or 1) + 1
     await db.flush()
     return {"message": "Password changed successfully"}
 

@@ -39,6 +39,14 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    # CAPTCHA
+    CAPTCHA_ENABLED: bool = True
+    CAPTCHA_EXPIRE_SECONDS: int = 300
+
+    # Login Security
+    LOGIN_MAX_ATTEMPTS: int = 5
+    LOGIN_LOCKOUT_MINUTES: int = 15
+
     # Default admin
     DEFAULT_ADMIN_USERNAME: str = "admin"
     DEFAULT_ADMIN_PASSWORD: str = "admin123"

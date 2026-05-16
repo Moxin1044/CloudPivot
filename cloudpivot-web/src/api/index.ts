@@ -8,6 +8,18 @@ const request = axios.create({
   timeout: 30000,
 });
 
+// Token refresh state (avoid concurrent refresh calls)
+let isRefreshing = false;
+let refreshQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
+
+function processRefreshQueue(token: string | null, error: any = null) {
+  refreshQueue.forEach(({ resolve, reject }) => {
+    if (token) resolve(token);
+    else reject(error);
+  });
+  refreshQueue = [];
+}
+
 request.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,11 +30,55 @@ request.interceptors.request.use((config) => {
 
 request.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
     const status = error.response?.status;
     const detail = error.response?.data?.detail || '请求失败';
+    const originalRequest = error.config;
 
-    if (status === 401) {
+    if (status === 401 && !originalRequest._retry) {
+      // Try token refresh
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
+        if (isRefreshing) {
+          // Queue requests while refreshing
+          return new Promise((resolve, reject) => {
+            refreshQueue.push({
+              resolve: (token: string) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                resolve(request(originalRequest));
+              },
+              reject,
+            });
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          const res: any = await axios.post('/api/v1/auth/refresh', { refresh_token: refreshToken });
+          const newToken = res.data?.access_token || res.access_token;
+          const newRefreshToken = res.data?.refresh_token || res.refresh_token;
+
+          if (newToken) {
+            localStorage.setItem('token', newToken);
+            if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
+            processRefreshQueue(newToken);
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return request(originalRequest);
+          }
+        } catch (refreshError) {
+          processRefreshQueue(null, refreshError);
+          const userStore = useUserStore();
+          userStore.logout();
+          router.push('/login');
+          MessagePlugin.error('登录已过期，请重新登录');
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+
       const userStore = useUserStore();
       userStore.logout();
       router.push('/login');
@@ -43,9 +99,12 @@ export default request;
 
 // ===== Auth API =====
 export const authApi = {
-  login: (data: { username: string; password: string }) => request.post('/auth/login', data),
+  login: (data: { username: string; password: string; captcha_id?: string; captcha_code?: string }) =>
+    request.post('/auth/login', data),
   register: (data: any) => request.post('/auth/register', data),
   refresh: (data: { refresh_token: string }) => request.post('/auth/refresh', data),
+  logout: () => request.post('/auth/logout'),
+  getCaptcha: () => request.get('/auth/captcha'),
   getMe: () => request.get('/users/me'),
   updateMe: (data: any) => request.put('/users/me', data),
   updateNotifications: (data: any) => request.put('/users/me/notifications', data),

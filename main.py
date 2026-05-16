@@ -14,6 +14,7 @@ from app.core.docker_client import docker_client
 
 # Import routers
 from app.routers.auth import router as auth_router, user_router
+from app.routers.captcha import router as captcha_router
 from app.routers.team import router as team_router
 from app.routers.host import router as host_router
 from app.routers.webssh import router as webssh_router
@@ -140,6 +141,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(auxiliary_router)
+app.include_router(captcha_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(user_router, prefix="/api/v1")
 app.include_router(team_router, prefix="/api/v1")

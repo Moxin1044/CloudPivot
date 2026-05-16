@@ -38,6 +38,7 @@ class User(Base):
     notify_channels = Column(String(128), nullable=True)  # comma-separated: "email,feishu,dingtalk"
     last_login_at = Column(DateTime(timezone=True), nullable=True)
     last_login_ip = Column(String(64), nullable=True)
+    token_version = Column(Integer, default=1, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

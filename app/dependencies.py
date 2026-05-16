@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from app.core.security import decode_token
+from app.core.security import decode_token, is_token_blacklisted
 from app.models.user import User
 from sqlalchemy import select
 
@@ -13,7 +13,16 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
-    payload = decode_token(credentials.credentials)
+    token = credentials.credentials
+
+    # Check token blacklist
+    if is_token_blacklisted(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+        )
+
+    payload = decode_token(token)
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,6 +46,16 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
         )
+
+    # Check token version matches current user version
+    token_ver = payload.get("ver", 1)
+    user_ver = user.token_version if hasattr(user, "token_version") else 1
+    if token_ver != user_ver:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token version mismatch, please re-login",
+        )
+
     return user
 
 

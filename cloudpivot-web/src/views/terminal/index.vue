@@ -169,8 +169,7 @@ function connect() {
   const wsBase = `${wsProtocol}//${window.location.host}`;
   const wsUrl = `${wsBase}/api/v1/ws/ssh/${selectedHostId.value}?token=${token}`;
 
-  const ws = new WebSocket(wsUrl, ['binary']);
-  ws.binaryType = 'arraybuffer';
+  const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
     tab.connected = true;
