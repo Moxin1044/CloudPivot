@@ -4660,3 +4660,61 @@ created
 2026-05-16 19:15:35 | INFO     | main:lifespan:121 - Cleanup complete
 2026-05-16 19:15:35 | INFO     | main:lifespan:108 - Shutting down...
 2026-05-16 19:15:35 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:15:37 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:15:37 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:15:37 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:15:37 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:15:37 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:15:37 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:15:38 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:15:38 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:15:38 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:15:38 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:15:38 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:15:38 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:15:39 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 3 records for host 10.0.8.35
+2026-05-16 19:15:39 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:15:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:15:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:15:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:15:41 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:15:58 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:15:58 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:15:58 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:15:58 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:15:58 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:15:58 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:15:58 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:15:58 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:16:01 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:16:01 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:16:01 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:16:01 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:16:01 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:16:01 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:16:01 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:16:01 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:16:01 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:16:01 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:16:01 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:16:01 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:16:02 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:16:02 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 2 records for host 10.0.8.35
+2026-05-16 19:16:02 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:16:02 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:16:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:16:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:16:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:16:03 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:17:06 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:17:06 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:17:06 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:17:06 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:18:08 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:18:08 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:18:08 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:18:08 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:19:10 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:19:10 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:19:10 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts
+2026-05-16 19:19:10 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:192 - Metrics collected for 1 hosts

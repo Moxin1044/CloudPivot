@@ -101,12 +101,12 @@ const containerColumns = [
   { colKey: 'status', title: t('docker.detail'), width: 150 },
   { colKey: 'actions', title: t('common.actions'), width: 340,
     cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:4px;flex-wrap:wrap' }, [
-      row.state !== 'running' ? _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => onStart(row.id) }, t('docker.start')) : null,
-      row.state === 'running' ? _h('t-button', { size: 'small', variant: 'text', theme: 'warning', onClick: () => onStop(row.id) }, t('docker.stop')) : null,
-      _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => onRestart(row.id) }, t('docker.restart')),
-      _h('t-button', { size: 'small', variant: 'text', onClick: () => onViewLogs(row.id) }, t('docker.logs')),
-      _h('t-button', { size: 'small', variant: 'text', onClick: () => { execContainerId.value = row.id; showExec.value = true; } }, t('docker.exec')),
-      _h('t-button', { size: 'small', variant: 'text', theme: 'danger', onClick: () => onRemove(row.id) }, t('common.delete')),
+      row.state !== 'running' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => onStart(row.id) }, t('docker.start')) : null,
+      row.state === 'running' ? _h('t-button', { size: 'small', variant: 'outline', theme: 'warning', onClick: () => onStop(row.id) }, t('docker.stop')) : null,
+      _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => onRestart(row.id) }, t('docker.restart')),
+      _h('t-button', { size: 'small', variant: 'outline', onClick: () => onViewLogs(row.id) }, t('docker.logs')),
+      _h('t-button', { size: 'small', variant: 'outline', onClick: () => { execContainerId.value = row.id; showExec.value = true; } }, t('docker.exec')),
+      _h('t-button', { size: 'small', variant: 'outline', theme: 'danger', onClick: () => onRemove(row.id) }, t('common.delete')),
     ].filter(Boolean))
   },
 ];
@@ -118,7 +118,7 @@ const imageColumns = [
   },
   { colKey: 'size_mb', title: t('docker.sizeMB'), width: 100 },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'text', theme: 'danger', onClick: () => onRemoveImage(row.id) }, t('common.delete'))
+    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'danger', onClick: () => onRemoveImage(row.id) }, t('common.delete'))
   },
 ];
 
@@ -127,7 +127,7 @@ const hostColumns = [
   { colKey: 'host', title: t('docker.address') },
   { colKey: 'is_active', title: t('common.status') },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDeleteHost(row.id) }, t('common.delete'))
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDeleteHost(row.id) }, t('common.delete'))
   },
 ];
 

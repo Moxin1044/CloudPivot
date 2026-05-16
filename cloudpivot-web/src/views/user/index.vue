@@ -33,10 +33,10 @@
         </template>
         <template #op="{ row }">
           <t-space>
-            <t-button variant="text" theme="primary" size="small" @click="onEdit(row)">
+            <t-button variant="outline" theme="primary" size="small" @click="onEdit(row)">
               {{ $t('common.edit') }}
             </t-button>
-            <t-button variant="text" theme="danger" size="small" @click="onDelete(row)">
+            <t-button variant="outline" theme="danger" size="small" @click="onDelete(row)">
               {{ $t('common.delete') }}
             </t-button>
           </t-space>

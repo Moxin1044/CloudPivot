@@ -116,7 +116,7 @@ const sessionColumns = [
   { colKey: 'ended_at', title: t('audit.endedAt'), width: 180 },
   { colKey: 'duration_seconds', title: t('audit.duration'), width: 80 },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => viewSession(row.id) }, t('common.detail'))
+    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewSession(row.id) }, t('common.detail'))
   },
 ];
 
@@ -128,7 +128,7 @@ const commandColumns = [
   { colKey: 'is_blocked', title: t('audit.isBlocked'), width: 60 },
   { colKey: 'executed_at', title: t('audit.executedAt'), width: 180 },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => viewCommand(row.id) }, t('common.detail'))
+    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewCommand(row.id) }, t('common.detail'))
   },
 ];
 
@@ -139,7 +139,7 @@ const loginColumns = [
   { colKey: 'login_method', title: t('audit.method'), width: 80 },
   { colKey: 'login_at', title: t('audit.loginAt'), width: 180 },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'text', theme: 'primary', onClick: () => viewLogin(row.id) }, t('common.detail'))
+    cell: (_h: any, { row }: any) => _h('t-button', { size: 'small', variant: 'outline', theme: 'primary', onClick: () => viewLogin(row.id) }, t('common.detail'))
   },
 ];
 

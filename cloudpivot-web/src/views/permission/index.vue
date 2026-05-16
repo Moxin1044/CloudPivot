@@ -85,7 +85,7 @@ const permColumns = [
   { colKey: 'can_execute', title: t('permission.canExecute') },
   { colKey: 'is_active', title: t('common.status') },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDeletePerm(row.id) }, t('common.delete'))
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDeletePerm(row.id) }, t('common.delete'))
   },
 ];
 
@@ -97,7 +97,7 @@ const tempColumns = [
   { colKey: 'expires_at', title: t('permission.expiresAt') },
   { colKey: 'is_revoked', title: t('permission.revoked') },
   { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onRevokeTemp(row.id) }, t('permission.revokeBtn'))
+    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onRevokeTemp(row.id) }, t('permission.revokeBtn'))
   },
 ];
 

@@ -20,6 +20,7 @@
       <t-col :span="8">
         <t-card :title="$t('dashboard.resourceUsage')" :bordered="false">
           <div ref="chartRef" style="height: 300px"></div>
+          <t-empty v-if="!data.resourceUsage?.length" style="padding: 40px 0" />
         </t-card>
       </t-col>
       <t-col :span="4">
@@ -58,19 +59,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dashboardApi } from '@/api';
+import * as echarts from 'echarts';
 import dayjs from 'dayjs';
 
 const { t } = useI18n();
 
 const data = ref<any>({ overview: {}, resourceUsage: [], recentAudits: [], recentAlerts: [] });
 const chartRef = ref<HTMLElement>();
+let chart: echarts.ECharts | null = null;
 
-const statCards = computed(() => {
+const statCards = ref<any[]>([]);
+
+function updateStatCards() {
   const o = data.value.overview || {};
-  return [
+  statCards.value = [
     { key: 'totalHosts', value: o.total_hosts || 0, icon: 'server', color: '#0052d9' },
     { key: 'onlineHosts', value: o.online_hosts || 0, icon: 'check-circle', color: '#00a870' },
     { key: 'activeSessions', value: o.active_sessions || 0, icon: 'root-list', color: '#e37318' },
@@ -80,36 +85,74 @@ const statCards = computed(() => {
     { key: 'activeAlerts', value: o.active_alerts || 0, icon: 'error-circle', color: '#e34d59' },
     { key: 'riskCommandsToday', value: o.risk_commands_today || 0, icon: 'close-circle', color: '#c9353f' },
   ];
-});
+}
 
 const auditColumns = [
   { colKey: 'username', title: t('dashboard.user'), width: 120 },
   { colKey: 'host_name', title: t('dashboard.host'), width: 150 },
   { colKey: 'command', title: t('dashboard.command'), ellipsis: true },
   { colKey: 'risk_level', title: t('dashboard.risk'), width: 80,
-    cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.risk_level === 'danger' ? 'danger' : row.risk_level === 'warning' ? 'warning' : 'default', size: 'small' } }, row.risk_level)
+    cell: (h: any, { row }: any) => h('t-tag', { theme: row.risk_level === 'danger' ? 'danger' : row.risk_level === 'warning' ? 'warning' : 'default', size: 'small' }, row.risk_level)
   },
   { colKey: 'executed_at', title: t('dashboard.time'), width: 180, cell: (h: any, { row }: any) => formatTime(row.executed_at) },
 ];
 
-function formatTime(t: string) {
-  return t ? dayjs(t).format('YYYY-MM-DD HH:mm:ss') : '-';
+function formatTime(ts: string) {
+  return ts ? dayjs(ts).format('YYYY-MM-DD HH:mm:ss') : '-';
 }
 
 function severityTheme(s: string) {
   return s === 'critical' ? 'danger' : s === 'warning' ? 'warning' : 'default';
 }
 
+function updateResourceChart() {
+  if (!chart) return;
+  const usage = data.value.resourceUsage || [];
+  if (!usage.length) {
+    chart.clear();
+    return;
+  }
+  const hosts = usage.map((u: any) => u.host_name);
+  chart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    legend: { data: ['CPU%', 'Memory%', 'Disk%'], bottom: 0 },
+    grid: { left: '3%', right: '4%', bottom: '14%', top: '8%', containLabel: true },
+    xAxis: { type: 'category', data: hosts, axisLabel: { fontSize: 11, rotate: hosts.length > 5 ? 20 : 0 } },
+    yAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%', fontSize: 11 } },
+    series: [
+      { name: 'CPU%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.cpu_percent?.toFixed(1) ?? 0), itemStyle: { color: '#0052d9' } },
+      { name: 'Memory%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.memory_percent?.toFixed(1) ?? 0), itemStyle: { color: '#e37318' } },
+      { name: 'Disk%', type: 'bar', barMaxWidth: 24, data: usage.map((u: any) => u.disk_percent?.toFixed(1) ?? 0), itemStyle: { color: '#8c5fe0' } },
+    ],
+  }, true);
+}
+
 async function loadData() {
   try {
     data.value = await dashboardApi.getOverview();
+    updateStatCards();
+    await nextTick();
+    if (!chart && chartRef.value) {
+      chart = echarts.init(chartRef.value);
+    }
+    updateResourceChart();
   } catch (e) {
     // handled
   }
 }
 
+function onResize() {
+  chart?.resize();
+}
+
 onMounted(() => {
   loadData();
+  window.addEventListener('resize', onResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize);
+  chart?.dispose();
 });
 </script>
 

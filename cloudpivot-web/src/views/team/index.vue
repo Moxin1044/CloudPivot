@@ -40,8 +40,8 @@ const columns = [
   { colKey: 'created_at', title: t('common.createdAt') },
   { colKey: 'actions', title: t('common.actions'), width: 180,
     cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:8px' }, [
-      _h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => viewMembers(row.id) }, t('team.memberBtn')),
-      _h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('common.delete')),
+      _h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => viewMembers(row.id) }, t('team.memberBtn')),
+      _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('common.delete')),
     ])
   },
 ];
