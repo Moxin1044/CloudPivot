@@ -1,11 +1,1222 @@
-# Test your FastAPI endpoints
+### ============================================================
+### CloudPivot API 测试集合
+### 基础路径: http://127.0.0.1:8000/api/v1
+### 使用方式: 在 VS Code 中安装 REST Client 扩展，点击 Send Request
+### ============================================================
+
+@baseUrl = http://127.0.0.1:8000/api/v1
+@token = {{access_token}}
+
+### ============================================================
+### 0. 健康检查
+### ============================================================
 
 GET http://127.0.0.1:8000/
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/hello/User
+### ============================================================
+### 1. 认证模块 (Auth)
+### ============================================================
+
+### 1.1 获取验证码 🔓
+GET {{baseUrl}}/auth/captcha
 Accept: application/json
+
+###
+
+### 1.2 用户注册 🔓
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "test123456",
+  "display_name": "Test User"
+}
+
+###
+
+### 1.3 用户登录 🔓 (获取 access_token 和 refresh_token)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+  client.global.set("access_token", response.body.access_token);
+  client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+###
+
+### 1.4 用户登录 (带验证码) 🔓
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "captcha_id": "replace-with-captcha-id",
+  "captcha_code": "replace-with-captcha-code"
+}
+
+###
+
+### 1.5 刷新令牌 🔓
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+> {%
+  client.global.set("access_token", response.body.access_token);
+  client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+###
+
+### 1.6 用户登出 🔑
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 2. 用户管理模块 (Users)
+### ============================================================
+
+### 2.1 获取当前用户信息 🔑
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{access_token}}
+
+###
+
+### 2.2 更新当前用户信息 🔑
+PUT {{baseUrl}}/users/me
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "display_name": "Super Admin",
+  "language": "zh-CN",
+  "theme": "dark"
+}
+
+###
+
+### 2.3 更新个人通知配置 🔑
+PUT {{baseUrl}}/users/me/notifications
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "notification_email": "admin@cloudpivot.localhost",
+  "feishu_webhook": "https://open.feishu.cn/open-apis/bot/v2/hook/xxx",
+  "dingtalk_webhook": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
+  "notify_channels": "email,feishu"
+}
+
+###
+
+### 2.4 修改密码 🔑
+PUT {{baseUrl}}/users/me/password
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "old_password": "admin123",
+  "new_password": "newadmin123"
+}
+
+###
+
+### 2.5 获取用户列表 👑
+GET {{baseUrl}}/users?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 2.6 获取用户列表 - 按角色筛选 👑
+GET {{baseUrl}}/users?role=admin&status=active
+Authorization: Bearer {{access_token}}
+
+###
+
+### 2.7 获取用户列表 - 搜索 👑
+GET {{baseUrl}}/users?search=admin
+Authorization: Bearer {{access_token}}
+
+###
+
+### 2.8 创建用户 👑
+POST {{baseUrl}}/users
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "newuser123456",
+  "display_name": "New User",
+  "role": "viewer",
+  "status": "active"
+}
+
+> {%
+  client.global.set("new_user_id", response.body.id);
+%}
+
+###
+
+### 2.9 获取指定用户详情 👑
+GET {{baseUrl}}/users/{{new_user_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 2.10 更新指定用户信息 👑
+PUT {{baseUrl}}/users/{{new_user_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "display_name": "Updated User",
+  "role": "admin"
+}
+
+###
+
+### 2.11 删除用户 👑
+DELETE {{baseUrl}}/users/{{new_user_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 3. 团队管理模块 (Teams)
+### ============================================================
+
+### 3.1 获取团队列表 🔑
+GET {{baseUrl}}/teams?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 3.2 创建团队 🔑
+POST {{baseUrl}}/teams
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "运维团队",
+  "description": "负责生产环境运维"
+}
+
+> {%
+  client.global.set("team_id", response.body.id);
+%}
+
+###
+
+### 3.3 获取团队详情 🔑
+GET {{baseUrl}}/teams/{{team_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 3.4 更新团队信息 🔑
+PUT {{baseUrl}}/teams/{{team_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "运维团队-V2",
+  "description": "负责生产与测试环境运维"
+}
+
+###
+
+### 3.5 获取团队成员列表 🔑
+GET {{baseUrl}}/teams/{{team_id}}/members
+Authorization: Bearer {{access_token}}
+
+###
+
+### 3.6 添加团队成员 🔑
+POST {{baseUrl}}/teams/{{team_id}}/members
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "user_id": 2,
+  "role": "member"
+}
+
+> {%
+  client.global.set("member_user_id", response.body.user_id);
+%}
+
+###
+
+### 3.7 更新成员角色 🔑
+PUT {{baseUrl}}/teams/{{team_id}}/members/{{member_user_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "role": "admin"
+}
+
+###
+
+### 3.8 移除团队成员 🔑
+DELETE {{baseUrl}}/teams/{{team_id}}/members/{{member_user_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 3.9 删除团队 👑
+DELETE {{baseUrl}}/teams/{{team_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 4. 主机管理模块 (Hosts)
+### ============================================================
+
+### 4.1 获取主机列表 🔑
+GET {{baseUrl}}/hosts?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.2 获取主机列表 - 按状态筛选 🔑
+GET {{baseUrl}}/hosts?status=online&limit=10
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.3 获取主机列表 - 按关键词搜索 🔑
+GET {{baseUrl}}/hosts?keyword=web&skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.4 获取主机列表 - 按分组筛选 🔑
+GET {{baseUrl}}/hosts?group_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.5 添加主机 (密码认证) 🔑
+POST {{baseUrl}}/hosts
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "web-server-01",
+  "hostname": "web01",
+  "ip_address": "192.168.1.10",
+  "port": 22,
+  "auth_type": "password",
+  "username": "root",
+  "password": "your-ssh-password",
+  "description": "Web 前端服务器",
+  "public_ip": "1.2.3.4",
+  "os_name": "Ubuntu",
+  "os_version": "22.04"
+}
+
+> {%
+  client.global.set("host_id", response.body.id);
+%}
+
+###
+
+### 4.6 添加主机 (密钥认证) 🔑
+POST {{baseUrl}}/hosts
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "db-server-01",
+  "hostname": "db01",
+  "ip_address": "192.168.1.20",
+  "port": 22,
+  "auth_type": "key",
+  "username": "root",
+  "private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\nreplace-with-your-key\n-----END OPENSSH PRIVATE KEY-----",
+  "description": "数据库服务器"
+}
+
+###
+
+### 4.7 批量导入主机 👑
+POST {{baseUrl}}/hosts/batch-import
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "hosts": [
+    {
+      "name": "server-01",
+      "hostname": "srv01",
+      "ip_address": "192.168.1.30",
+      "username": "root",
+      "password": "secret"
+    },
+    {
+      "name": "server-02",
+      "hostname": "srv02",
+      "ip_address": "192.168.1.31",
+      "username": "root",
+      "auth_type": "key",
+      "private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+    }
+  ]
+}
+
+###
+
+### 4.8 获取主机详情 🔑
+GET {{baseUrl}}/hosts/{{host_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.9 获取主机监控图表数据 🔑
+GET {{baseUrl}}/hosts/{{host_id}}/metrics?hours=24
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.10 更新主机信息 🔑
+PUT {{baseUrl}}/hosts/{{host_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "web-server-01-updated",
+  "description": "Web 前端服务器 (已更新)",
+  "port": 2222
+}
+
+###
+
+### 4.11 测试主机连通性 🔑
+POST {{baseUrl}}/hosts/{{host_id}}/test
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.12 删除主机 🔑
+DELETE {{baseUrl}}/hosts/{{host_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.13 获取主机组列表 🔑
+GET {{baseUrl}}/hosts/groups/list
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.14 创建主机组 🔑
+POST {{baseUrl}}/hosts/groups
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "生产环境",
+  "description": "生产环境服务器组",
+  "parent_id": null
+}
+
+> {%
+  client.global.set("group_id", response.body.id);
+%}
+
+###
+
+### 4.15 获取标签列表 🔑
+GET {{baseUrl}}/hosts/tags/list
+Authorization: Bearer {{access_token}}
+
+###
+
+### 4.16 创建标签 🔑
+POST {{baseUrl}}/hosts/tags
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "生产环境",
+  "color": "#e02424"
+}
+
+> {%
+  client.global.set("tag_id", response.body.id);
+%}
+
+###
+
+### ============================================================
+### 5. WebSSH / 会话模块
+### ============================================================
+
+### 5.1 获取会话列表 🔑
+GET {{baseUrl}}/sessions?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 5.2 获取会话命令记录 🔑
+GET {{baseUrl}}/sessions/1/commands?skip=0&limit=100
+Authorization: Bearer {{access_token}}
+
+###
+
+### 5.3 获取会话录屏记录 🔑
+GET {{baseUrl}}/sessions/1/recording
+Authorization: Bearer {{access_token}}
+
+###
+
+### 5.4 获取活跃会话列表 🔑
+GET {{baseUrl}}/active-sessions
+Authorization: Bearer {{access_token}}
+
+###
+
+### 5.5 WebSSH WebSocket 连接 (需 WebSocket 客户端测试)
+### 连接地址: ws://127.0.0.1:8000/api/v1/ws/ssh/{{host_id}}?token={{access_token}}
+### 消息示例:
+###   输入: {"type": "input", "data": "ls -la\n"}
+###   调整尺寸: {"type": "resize", "cols": 120, "rows": 40}
+###   心跳: {"type": "ping"}
+
+### ============================================================
+### 6. 权限控制模块 (Permissions)
+### ============================================================
+
+### 6.1 获取权限列表 🔑
+GET {{baseUrl}}/permissions
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.2 获取权限列表 - 按主机筛选 🔑
+GET {{baseUrl}}/permissions?host_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.3 获取权限列表 - 按团队筛选 🔑
+GET {{baseUrl}}/permissions?team_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.4 获取权限列表 - 按用户筛选 🔑
+GET {{baseUrl}}/permissions?user_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.5 创建权限 (团队授权) 🔑
+POST {{baseUrl}}/permissions
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "host_id": 1,
+  "team_id": 1,
+  "permission_level": "read_execute",
+  "can_upload": false,
+  "can_download": true,
+  "can_execute": true,
+  "allowed_time_start": "09:00",
+  "allowed_time_end": "18:00",
+  "allowed_days": "1,2,3,4,5"
+}
+
+> {%
+  client.global.set("perm_id", response.body.id);
+%}
+
+###
+
+### 6.6 创建权限 (用户授权) 🔑
+POST {{baseUrl}}/permissions
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "host_id": 1,
+  "user_id": 2,
+  "permission_level": "readonly",
+  "can_upload": false,
+  "can_download": false,
+  "can_execute": false
+}
+
+###
+
+### 6.7 更新权限 🔑
+PUT {{baseUrl}}/permissions/{{perm_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "permission_level": "read_write",
+  "can_upload": true,
+  "can_download": true,
+  "can_execute": true,
+  "is_active": true
+}
+
+###
+
+### 6.8 删除权限 🔑
+DELETE {{baseUrl}}/permissions/{{perm_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.9 获取临时授权列表 🔑
+GET {{baseUrl}}/permissions/temporary
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.10 获取临时授权列表 - 按用户筛选 🔑
+GET {{baseUrl}}/permissions/temporary?user_id=2
+Authorization: Bearer {{access_token}}
+
+###
+
+### 6.11 创建临时授权 🔑
+POST {{baseUrl}}/permissions/temporary
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "host_id": 1,
+  "user_id": 2,
+  "permission_level": "read_execute",
+  "reason": "紧急运维需求",
+  "expires_at": "2026-05-20T00:00:00Z"
+}
+
+> {%
+  client.global.set("temp_perm_id", response.body.id);
+%}
+
+###
+
+### 6.12 撤销临时授权 🔑
+POST {{baseUrl}}/permissions/temporary/{{temp_perm_id}}/revoke
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 7. Dashboard 模块
+### ============================================================
+
+### 7.1 获取 Dashboard 数据 🔑
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 8. 主机监控模块 (Monitor)
+### ============================================================
+
+### 8.1 获取主机监控指标 🔑
+GET {{baseUrl}}/monitor/metrics/1?hours=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.2 获取主机监控指标 (24小时) 🔑
+GET {{baseUrl}}/monitor/metrics/1?hours=24
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.3 获取主机最新指标 🔑
+GET {{baseUrl}}/monitor/metrics/1/latest
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.4 获取告警规则列表 🔑
+GET {{baseUrl}}/monitor/alert-rules
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.5 创建告警规则 🔑
+POST {{baseUrl}}/monitor/alert-rules
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "CPU 过高告警",
+  "description": "CPU 使用率超过 90%",
+  "metric_type": "cpu_percent",
+  "condition": "gt",
+  "threshold": 90.0,
+  "duration_seconds": 0,
+  "severity": "warning",
+  "notify_channels": ["email"],
+  "is_enabled": true
+}
+
+> {%
+  client.global.set("rule_id", response.body.id);
+%}
+
+###
+
+### 8.6 创建告警规则 (指定主机) 🔑
+POST {{baseUrl}}/monitor/alert-rules
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "内存告警 - web-server",
+  "metric_type": "memory_percent",
+  "condition": "gt",
+  "threshold": 85.0,
+  "severity": "critical",
+  "host_id": 1,
+  "notify_channels": ["email", "webhook"],
+  "webhook_url": "https://hooks.example.com/alert",
+  "is_enabled": true
+}
+
+###
+
+### 8.7 更新告警规则 🔑
+PUT {{baseUrl}}/monitor/alert-rules/{{rule_id}}
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "CPU 过高告警 (更新)",
+  "threshold": 95.0,
+  "severity": "critical",
+  "is_enabled": true
+}
+
+###
+
+### 8.8 删除告警规则 🔑
+DELETE {{baseUrl}}/monitor/alert-rules/{{rule_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.9 获取告警记录列表 🔑
+GET {{baseUrl}}/monitor/alerts?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.10 获取告警记录 - 按严重级别筛选 🔑
+GET {{baseUrl}}/monitor/alerts?severity=critical&status=pending
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.11 确认告警 🔑
+POST {{baseUrl}}/monitor/alerts/1/acknowledge
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.12 解决告警 🔑
+POST {{baseUrl}}/monitor/alerts/1/resolve
+Authorization: Bearer {{access_token}}
+
+###
+
+### 8.13 Agent 上报监控数据 🔓
+POST {{baseUrl}}/monitor/agent/report
+Content-Type: application/json
+
+{
+  "host_id": 1,
+  "cpu_percent": 45.2,
+  "memory_percent": 68.1,
+  "memory_used_gb": 10.9,
+  "memory_total_gb": 16.0,
+  "disk_percent": 52.0,
+  "disk_used_gb": 104.0,
+  "disk_total_gb": 200.0,
+  "network_in_kbps": 1024.5,
+  "network_out_kbps": 512.3,
+  "load_1min": 1.25,
+  "load_5min": 1.10,
+  "load_15min": 0.95
+}
+
+###
+
+### ============================================================
+### 9. Docker 管理模块
+### ============================================================
+
+### 9.1 获取 Docker 主机列表 🔑
+GET {{baseUrl}}/docker/hosts
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.2 添加 Docker 主机 🔑
+POST {{baseUrl}}/docker/hosts
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "本地 Docker",
+  "host": "unix:///var/run/docker.sock",
+  "tls_verify": false
+}
+
+> {%
+  client.global.set("docker_host_id", response.body.id);
+%}
+
+###
+
+### 9.3 添加 Docker 主机 (远程 TCP) 🔑
+POST {{baseUrl}}/docker/hosts
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "远程 Docker",
+  "host": "tcp://192.168.1.10:2376",
+  "host_id": 1,
+  "team_id": 1,
+  "tls_verify": true,
+  "cert_path": "/etc/docker/certs"
+}
+
+###
+
+### 9.4 删除 Docker 主机 🔑
+DELETE {{baseUrl}}/docker/hosts/{{docker_host_id}}
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.5 获取容器列表 🔑
+GET {{baseUrl}}/docker/containers?all=false
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.6 获取容器列表 (含已停止) 🔑
+GET {{baseUrl}}/docker/containers?all=true
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.7 获取容器详情 🔑
+GET {{baseUrl}}/docker/containers/nginx
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.8 启动容器 🔑
+POST {{baseUrl}}/docker/containers/nginx/start
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.9 停止容器 🔑
+POST {{baseUrl}}/docker/containers/nginx/stop
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "timeout": 10
+}
+
+###
+
+### 9.10 重启容器 🔑
+POST {{baseUrl}}/docker/containers/nginx/restart
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "timeout": 10
+}
+
+###
+
+### 9.11 删除容器 🔑
+DELETE {{baseUrl}}/docker/containers/nginx?force=false
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.12 获取容器日志 🔑
+GET {{baseUrl}}/docker/containers/nginx/logs?tail=100
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.13 获取容器资源统计 🔑
+GET {{baseUrl}}/docker/containers/nginx/stats
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.14 在容器内执行命令 🔑
+POST {{baseUrl}}/docker/containers/nginx/exec
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "command": "ls -la /",
+  "tty": true
+}
+
+###
+
+### 9.15 获取镜像列表 🔑
+GET {{baseUrl}}/docker/images
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.16 拉取镜像 🔑
+POST {{baseUrl}}/docker/images/pull?repository=nginx&tag=latest
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.17 删除镜像 🔑
+DELETE {{baseUrl}}/docker/images/sha256:abc123?force=false
+Authorization: Bearer {{access_token}}
+
+###
+
+### 9.18 获取 Docker 系统信息 🔑
+GET {{baseUrl}}/docker/info
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 10. 会话审计模块 (Audit)
+### ============================================================
+
+### 10.1 获取会话审计列表 🔑
+GET {{baseUrl}}/audit/sessions?skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.2 获取会话审计列表 - 按用户筛选 🔑
+GET {{baseUrl}}/audit/sessions?user_id=1&skip=0&limit=20
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.3 获取会话审计列表 - 按主机筛选 🔑
+GET {{baseUrl}}/audit/sessions?host_id=1&status=closed
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.4 获取会话审计列表 - 关键词搜索 🔑
+GET {{baseUrl}}/audit/sessions?keyword=192.168
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.5 获取命令审计列表 🔑
+GET {{baseUrl}}/audit/commands?skip=0&limit=50
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.6 获取命令审计列表 - 按风险等级筛选 🔑
+GET {{baseUrl}}/audit/commands?risk_level=danger&limit=50
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.7 获取命令审计列表 - 按会话筛选 🔑
+GET {{baseUrl}}/audit/commands?session_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.8 获取命令审计列表 - 关键词搜索 🔑
+GET {{baseUrl}}/audit/commands?keyword=rm
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.9 获取登录日志 🔑
+GET {{baseUrl}}/audit/login-logs?skip=0&limit=50
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.10 获取登录日志 - 按用户筛选 🔑
+GET {{baseUrl}}/audit/login-logs?user_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.11 获取登录日志 - 关键词搜索 🔑
+GET {{baseUrl}}/audit/login-logs?keyword=admin
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.12 获取风险命令列表 🔑
+GET {{baseUrl}}/audit/risk-commands?skip=0&limit=50
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.13 获取风险命令列表 - 关键词搜索 🔑
+GET {{baseUrl}}/audit/risk-commands?keyword=rm
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.14 导出命令审计 (JSON 格式) 🔑
+GET {{baseUrl}}/audit/export/commands?format=json
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.15 导出命令审计 (CSV 格式) 🔑
+GET {{baseUrl}}/audit/export/commands?format=csv
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.16 导出命令审计 - 按风险等级筛选 🔑
+GET {{baseUrl}}/audit/export/commands?format=json&risk_level=danger
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.17 获取 SSH 登录日志 🔑
+GET {{baseUrl}}/audit/ssh-login-logs?skip=0&limit=50&hours=24
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.18 获取 SSH 登录日志 - 按主机筛选 🔑
+GET {{baseUrl}}/audit/ssh-login-logs?host_id=1&hours=48
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.19 获取 SSH 登录日志 - 按风险等级筛选 🔑
+GET {{baseUrl}}/audit/ssh-login-logs?risk_level=danger&is_success=false
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.20 获取 SSH 登录日志 - 关键词搜索 🔑
+GET {{baseUrl}}/audit/ssh-login-logs?keyword=root
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.21 SSH 登录日志统计分析 🔑
+GET {{baseUrl}}/audit/ssh-login-logs/analysis?hours=24
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.22 SSH 登录日志统计分析 - 按主机 🔑
+GET {{baseUrl}}/audit/ssh-login-logs/analysis?host_id=1&hours=72
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.23 手动触发 SSH 登录日志采集 👑
+POST {{baseUrl}}/audit/ssh-login-logs/collect
+Authorization: Bearer {{access_token}}
+
+###
+
+### 10.24 手动触发 SSH 登录日志采集 (指定主机) 👑
+POST {{baseUrl}}/audit/ssh-login-logs/collect?host_id=1
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 11. SFTP 文件管理模块
+### ============================================================
+
+### 11.1 列出远程目录文件 🔑
+GET {{baseUrl}}/sftp/1/list?path=/
+Authorization: Bearer {{access_token}}
+
+###
+
+### 11.2 列出远程目录文件 (指定路径) 🔑
+GET {{baseUrl}}/sftp/1/list?path=/home
+Authorization: Bearer {{access_token}}
+
+###
+
+### 11.3 创建文件夹 🔑
+POST {{baseUrl}}/sftp/1/mkdir
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "path": "/home",
+  "name": "newdir"
+}
+
+###
+
+### 11.4 重命名文件/文件夹 🔑
+POST {{baseUrl}}/sftp/1/rename
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "path": "/home/oldname",
+  "new_name": "newname"
+}
+
+###
+
+### 11.5 移动文件/文件夹 🔑
+POST {{baseUrl}}/sftp/1/move
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "source_path": "/home/file.txt",
+  "target_path": "/tmp/"
+}
+
+###
+
+### 11.6 复制文件/文件夹 🔑
+POST {{baseUrl}}/sftp/1/copy
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "source_path": "/home/file.txt",
+  "target_path": "/home/backup/"
+}
+
+###
+
+### 11.7 删除文件/文件夹 🔑
+POST {{baseUrl}}/sftp/1/delete
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "path": "/home/unwanted.txt"
+}
+
+###
+
+### 11.8 下载文件 🔑
+GET {{baseUrl}}/sftp/1/download?path=/home/file.txt
+Authorization: Bearer {{access_token}}
+
+###
+
+### 11.9 上传文件 🔑
+POST {{baseUrl}}/sftp/1/upload?path=/home
+Authorization: Bearer {{access_token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="files"; filename="test.txt"
+Content-Type: text/plain
+
+Hello, this is a test file.
+------WebKitFormBoundary--
+
+###
+
+### 11.10 检查路径是否存在 🔑
+GET {{baseUrl}}/sftp/1/exists?path=/home/user
+Authorization: Bearer {{access_token}}
+
+###
+
+### ============================================================
+### 12. 站点配置模块 (Site Config)
+### ============================================================
+
+### 12.1 获取注册开放状态 🔓
+GET {{baseUrl}}/site-config/registration-status
+Accept: application/json
+
+###
+
+### 12.2 获取所有站点配置 👑
+GET {{baseUrl}}/site-config
+Authorization: Bearer {{access_token}}
+
+###
+
+### 12.3 更新单个站点配置 👑
+PUT {{baseUrl}}/site-config/allow_register
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "value": "true",
+  "description": "Whether open registration is allowed"
+}
+
+###
+
+### 12.4 批量更新站点配置 👑
+POST {{baseUrl}}/site-config/batch
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+[
+  {
+    "key": "allow_register",
+    "value": "false",
+    "description": "关闭注册"
+  },
+  {
+    "key": "site_name",
+    "value": "My CloudPivot",
+    "description": "站点名称"
+  }
+]
 
 ###
