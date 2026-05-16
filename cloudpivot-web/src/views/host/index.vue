@@ -103,16 +103,16 @@ const columns = [
   { colKey: 'username', title: t('host.username'), width: 100 },
   { colKey: 'status', title: t('common.status'), width: 90,
     cell: (h: any, { row }: any) => h('t-tag', {
-      props: { theme: row.status === 'online' ? 'success' : row.status === 'offline' ? 'danger' : 'default', size: 'small' }
+      theme: row.status === 'online' ? 'success' : row.status === 'offline' ? 'danger' : 'default', size: 'small'
     }, row.status === 'online' ? t('host.statusOnline') : row.status === 'offline' ? t('host.statusOffline') : t('host.statusUnknown'))
   },
   { colKey: 'auth_type', title: t('host.authType'), width: 70 },
-  { colKey: 'actions', title: t('common.actions'), width: 220,
+  { colKey: 'actions', title: t('common.actions'), width: 260,
     cell: (_h: any, { row }: any) => {
       return h('div', { style: 'display:flex;gap:8px' }, [
-        h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => router.push(`/hosts/${row.id}`) }, t('host.detailBtn')),
-        h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => onTest(row.id) }, t('host.testBtn')),
-        h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('host.deleteBtn')),
+        h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => router.push(`/hosts/${row.id}`) }, t('host.detailBtn')),
+        h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => onTest(row.id) }, t('host.testBtn')),
+        h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('host.deleteBtn')),
       ]);
     }
   },
