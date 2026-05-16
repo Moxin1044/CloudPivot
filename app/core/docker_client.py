@@ -14,13 +14,17 @@ class DockerClient:
         self._client: Optional[Docker] = None
 
     async def _get_client(self) -> Docker:
-        if self._client is None or self._client.closed:
+        if self._client is None:
             self._client = Docker(self._docker_host)
         return self._client
 
     async def close(self):
-        if self._client and not self._client.closed:
-            await self._client.close()
+        if self._client is not None:
+            try:
+                await self._client.close()
+            except Exception:
+                pass
+            self._client = None
 
     # Container operations
     async def list_containers(self, all: bool = False) -> List[Dict[str, Any]]:

@@ -124,7 +124,11 @@ async def websocket_ssh(
                 "connect_timeout": settings.WEBSSH_SSH_TIMEOUT,
             }
             if host.auth_type.value == "key" and host.private_key_encrypted:
-                connect_kwargs["client_keys"] = [host.private_key_encrypted]
+                pk = host.private_key_encrypted
+                if "-----BEGIN" in pk:
+                    connect_kwargs["client_keys"] = [asyncssh.import_private_key(pk)]
+                else:
+                    connect_kwargs["client_keys"] = [pk]
             elif host.password_encrypted:
                 connect_kwargs["password"] = host.password_encrypted
 
