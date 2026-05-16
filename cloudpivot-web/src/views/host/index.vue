@@ -26,7 +26,15 @@
         :pagination="pagination"
         @page-change="onPageChange"
         row-key="id"
-      />
+      >
+        <template #actions="{ row }">
+          <t-space>
+            <t-button variant="outline" theme="primary" size="small" @click="router.push(`/hosts/${row.id}`)">{{ $t('host.detailBtn') }}</t-button>
+            <t-button variant="outline" theme="primary" size="small" @click="onTest(row.id)">{{ $t('host.testBtn') }}</t-button>
+            <t-button variant="outline" theme="danger" size="small" @click="onDelete(row.id)">{{ $t('host.deleteBtn') }}</t-button>
+          </t-space>
+        </template>
+      </t-table>
     </t-card>
 
     <!-- Create Dialog -->
@@ -68,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, h } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useI18n } from 'vue-i18n';
@@ -107,15 +115,7 @@ const columns = [
     }, row.status === 'online' ? t('host.statusOnline') : row.status === 'offline' ? t('host.statusOffline') : t('host.statusUnknown'))
   },
   { colKey: 'auth_type', title: t('host.authType'), width: 70 },
-  { colKey: 'actions', title: t('common.actions'), width: 260,
-    cell: (_h: any, { row }: any) => {
-      return h('div', { style: 'display:flex;gap:8px' }, [
-        h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => router.push(`/hosts/${row.id}`) }, t('host.detailBtn')),
-        h('t-button', { variant: 'outline', theme: 'primary', size: 'small', onClick: () => onTest(row.id) }, t('host.testBtn')),
-        h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('host.deleteBtn')),
-      ]);
-    }
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 260 },
 ];
 
 async function loadData() {

@@ -173,9 +173,7 @@ const ruleColumns = [
   { colKey: 'threshold', title: t('monitor.thresholdLabel') },
   { colKey: 'severity', title: t('monitor.severityLabel') },
   { colKey: 'is_enabled', title: t('common.enabled') },
-  { colKey: 'actions', title: t('common.actions'), width: 100,
-    cell: (_h: any, { row }: any) => _h('t-button', { variant: 'outline', theme: 'danger', size: 'small', onClick: () => onDeleteRule(row.id) }, t('common.delete'))
-  },
+  { colKey: 'actions', title: t('common.actions'), width: 100 },
 ];
 
 async function loadHosts() {
