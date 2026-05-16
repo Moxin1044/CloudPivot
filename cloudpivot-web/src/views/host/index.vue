@@ -103,9 +103,9 @@ const columns = [
   { colKey: 'actions', title: t('common.actions'), width: 240,
     cell: (_h: any, { row }: any) => {
       return h('div', { style: 'display:flex;gap:8px' }, [
-        h('t-button', { props: { variant: 'text', theme: 'primary', size: 'small' }, on: { click: () => router.push(`/hosts/${row.id}`) } }, t('host.detailBtn')),
-        h('t-button', { props: { variant: 'text', theme: 'primary', size: 'small' }, on: { click: () => onTest(row.id) } }, t('host.testBtn')),
-        h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDelete(row.id) } }, t('host.deleteBtn')),
+        h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => router.push(`/hosts/${row.id}`) }, t('host.detailBtn')),
+        h('t-button', { variant: 'text', theme: 'primary', size: 'small', onClick: () => onTest(row.id) }, t('host.testBtn')),
+        h('t-button', { variant: 'text', theme: 'danger', size: 'small', onClick: () => onDelete(row.id) }, t('host.deleteBtn')),
       ]);
     }
   },
