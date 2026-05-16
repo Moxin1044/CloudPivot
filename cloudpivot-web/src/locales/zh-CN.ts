@@ -235,6 +235,7 @@ export default {
     memoryLabel: '内存',
     diskLabel: '磁盘',
     networkIn: '网络入',
+    networkOutKbps: '网络出',
     collectedAt: '时间',
     cpuPercent: 'CPU%',
     memoryPercent: '内存%',

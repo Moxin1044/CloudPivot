@@ -4500,3 +4500,41 @@ created
 2026-05-16 19:08:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:173 - Metrics collected for 1 hosts
 2026-05-16 19:08:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:173 - Metrics collected for 1 hosts
 2026-05-16 19:08:59 | INFO     | app.core.monitor_collector:collect_all_hosts_metrics:173 - Metrics collected for 1 hosts
+2026-05-16 19:09:56 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:09:56 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:09:56 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:09:56 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:09:56 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:09:56 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:09:56 | INFO     | main:lifespan:108 - Shutting down...
+2026-05-16 19:09:56 | INFO     | main:lifespan:121 - Cleanup complete
+2026-05-16 19:10:03 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:10:03 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:10:03 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:10:03 | INFO     | main:lifespan:80 - Starting CloudPivot in production mode
+2026-05-16 19:10:03 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:10:03 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:10:03 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:10:03 | INFO     | main:lifespan:86 - Database tables ensured
+2026-05-16 19:10:03 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:10:03 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:10:03 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:10:03 | INFO     | main:_ensure_default_admin:52 - Admin user already exists
+2026-05-16 19:10:04 | INFO     | app.core.ssh_log_collector:collect_host_ssh_logs:156 - SSH log collector: inserted 4 records for host 10.0.8.35
+2026-05-16 19:10:04 | INFO     | app.core.ssh_log_collector:ssh_log_collector_loop:235 - SSH log collector: analyzed 0 records
+2026-05-16 19:10:06 | ERROR    | app.core.monitor_collector:monitor_collector_loop:201 - Monitor collector error: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "network_in_kbps" of relation "host_metrics" does not exist
+[SQL: INSERT INTO host_metrics (host_id, cpu_percent, memory_percent, memory_used_gb, memory_total_gb, disk_percent, disk_used_gb, disk_total_gb, network_in_kbps, network_out_kbps, load_1min, load_5min, load_15min, collected_at) VALUES ($1::INTEGER, $2::FLOAT, $3::FLOAT, $4::FLOAT, $5::FLOAT, $6::FLOAT, $7::FLOAT, $8::FLOAT, $9::FLOAT, $10::FLOAT, $11::FLOAT, $12::FLOAT, $13::FLOAT, $14::TIMESTAMP WITH TIME ZONE) RETURNING host_metrics.id]
+[parameters: (1, 3.2, 35.26, 2.0, 7.0, 46.0, 23.0, 49.0, 1.65, 1.99, 0.18, 0.26, 0.2, datetime.datetime(2026, 5, 16, 19, 10, 6, 492699, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 19:10:06 | ERROR    | app.core.monitor_collector:monitor_collector_loop:201 - Monitor collector error: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "network_in_kbps" of relation "host_metrics" does not exist
+[SQL: INSERT INTO host_metrics (host_id, cpu_percent, memory_percent, memory_used_gb, memory_total_gb, disk_percent, disk_used_gb, disk_total_gb, network_in_kbps, network_out_kbps, load_1min, load_5min, load_15min, collected_at) VALUES ($1::INTEGER, $2::FLOAT, $3::FLOAT, $4::FLOAT, $5::FLOAT, $6::FLOAT, $7::FLOAT, $8::FLOAT, $9::FLOAT, $10::FLOAT, $11::FLOAT, $12::FLOAT, $13::FLOAT, $14::TIMESTAMP WITH TIME ZONE) RETURNING host_metrics.id]
+[parameters: (1, 1.6, 35.26, 2.0, 7.0, 46.0, 23.0, 49.0, 1.78, 2.12, 0.18, 0.26, 0.2, datetime.datetime(2026, 5, 16, 19, 10, 6, 512980, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 19:10:06 | ERROR    | app.core.monitor_collector:monitor_collector_loop:201 - Monitor collector error: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "network_in_kbps" of relation "host_metrics" does not exist
+[SQL: INSERT INTO host_metrics (host_id, cpu_percent, memory_percent, memory_used_gb, memory_total_gb, disk_percent, disk_used_gb, disk_total_gb, network_in_kbps, network_out_kbps, load_1min, load_5min, load_15min, collected_at) VALUES ($1::INTEGER, $2::FLOAT, $3::FLOAT, $4::FLOAT, $5::FLOAT, $6::FLOAT, $7::FLOAT, $8::FLOAT, $9::FLOAT, $10::FLOAT, $11::FLOAT, $12::FLOAT, $13::FLOAT, $14::TIMESTAMP WITH TIME ZONE) RETURNING host_metrics.id]
+[parameters: (1, 1.6, 35.21, 2.0, 7.0, 46.0, 23.0, 49.0, 1.78, 2.12, 0.18, 0.26, 0.2, datetime.datetime(2026, 5, 16, 19, 10, 6, 513350, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-05-16 19:10:06 | ERROR    | app.core.monitor_collector:monitor_collector_loop:201 - Monitor collector error: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "network_in_kbps" of relation "host_metrics" does not exist
+[SQL: INSERT INTO host_metrics (host_id, cpu_percent, memory_percent, memory_used_gb, memory_total_gb, disk_percent, disk_used_gb, disk_total_gb, network_in_kbps, network_out_kbps, load_1min, load_5min, load_15min, collected_at) VALUES ($1::INTEGER, $2::FLOAT, $3::FLOAT, $4::FLOAT, $5::FLOAT, $6::FLOAT, $7::FLOAT, $8::FLOAT, $9::FLOAT, $10::FLOAT, $11::FLOAT, $12::FLOAT, $13::FLOAT, $14::TIMESTAMP WITH TIME ZONE) RETURNING host_metrics.id]
+[parameters: (1, 1.7, 35.22, 2.0, 7.0, 46.0, 23.0, 49.0, 1.72, 2.08, 0.18, 0.26, 0.2, datetime.datetime(2026, 5, 16, 19, 10, 6, 550900, tzinfo=datetime.timezone.utc))]
+(Background on this error at: https://sqlalche.me/e/20/f405)

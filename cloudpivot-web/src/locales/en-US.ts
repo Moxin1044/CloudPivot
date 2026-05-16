@@ -235,6 +235,7 @@ export default {
     memoryLabel: 'Memory',
     diskLabel: 'Disk',
     networkIn: 'Net In',
+    networkOutKbps: 'Net Out',
     collectedAt: 'Time',
     cpuPercent: 'CPU%',
     memoryPercent: 'Mem%',
