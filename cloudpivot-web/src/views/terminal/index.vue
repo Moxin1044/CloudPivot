@@ -1,25 +1,22 @@
 <template>
   <div class="terminal-page">
-    <t-card :bordered="false">
-      <template #title>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>{{ $t('terminal.title') }}</span>
-          <div style="display: flex; gap: 8px;">
-            <t-select
-              v-model="selectedHostId"
-              :options="hostOptions"
-              :placeholder="$t('terminal.selectHost')"
-              style="width: 250px"
-              filterable
-            />
-            <t-button theme="primary" :disabled="!selectedHostId" @click="connect">
-              {{ $t('terminal.connect') }}
-            </t-button>
-            <t-button variant="outline" @click="addTab">
-              <template #icon><t-icon name="add" /></template>
-              {{ $t('terminal.newTab') }}
-            </t-button>
-          </div>
+    <t-card :bordered="false" :title="$t('terminal.title')">
+      <template #actions>
+        <div style="display: flex; gap: 8px;">
+          <t-select
+            v-model="selectedHostId"
+            :options="hostOptions"
+            :placeholder="$t('terminal.selectHost')"
+            style="width: 250px"
+            filterable
+          />
+          <t-button theme="primary" :disabled="!selectedHostId" @click="connect">
+            {{ $t('terminal.connect') }}
+          </t-button>
+          <t-button variant="outline" @click="addTab">
+            <template #icon><t-icon name="add" /></template>
+            {{ $t('terminal.newTab') }}
+          </t-button>
         </div>
       </template>
 
@@ -34,14 +31,14 @@
           <div class="terminal-container">
             <div :ref="el => setTerminalRef(tab.id, el)" class="terminal-instance"></div>
             <div v-if="!tab.connected" class="terminal-placeholder">
-              <t-empty description="选择主机并连接" />
+              <t-empty :description="$t('terminal.selectHostAndConnect')" />
             </div>
           </div>
         </t-tab-panel>
       </t-tabs>
 
       <div v-if="tabs.length === 0" class="terminal-placeholder">
-        <t-empty description="点击新标签创建终端会话" />
+        <t-empty :description="$t('terminal.clickNewTab')" />
       </div>
     </t-card>
   </div>
@@ -50,12 +47,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import '@xterm/xterm/css/xterm.css';
 import { hostApi } from '@/api';
 
+const { t } = useI18n();
 const route = useRoute();
 const selectedHostId = ref<number | undefined>(undefined);
 const hostOptions = ref<any[]>([]);
@@ -77,7 +76,6 @@ async function loadHosts() {
       label: `${h.name} (${h.ip_address})`,
       value: h.id,
     }));
-    // Auto-select from query
     if (route.query.hostId) {
       selectedHostId.value = Number(route.query.hostId);
     }
@@ -86,7 +84,7 @@ async function loadHosts() {
 
 function addTab() {
   const id = `tab-${Date.now()}`;
-  tabs.value.push({ id, label: 'New Terminal', hostId: null, connected: false });
+  tabs.value.push({ id, label: t('terminal.newTerminal'), hostId: null, connected: false });
   activeTab.value = id;
 
   nextTick(() => {

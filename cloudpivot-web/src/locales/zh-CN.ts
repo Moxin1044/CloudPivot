@@ -130,6 +130,7 @@ export default {
     selectHostAndConnect: '选择主机并连接',
     clickNewTab: '点击新标签创建终端会话',
     newTerminal: 'New Terminal',
+    terminalLabel: '终端',
   },
   team: {
     title: '团队管理',
@@ -336,5 +337,6 @@ export default {
     feishuTip: '飞书群机器人地址',
     dingtalkTip: '钉钉群机器人地址',
     channelsTip: '勾选后，告警将通过对应渠道发送到您配置的地址',
+    logout: '退出登录',
   },
 };

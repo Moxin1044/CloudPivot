@@ -4,33 +4,33 @@
       <t-tab-panel value="metrics" :label="$t('monitor.title')">
         <t-card :bordered="false">
           <div style="display:flex;gap:16px;margin-bottom:16px">
-            <t-select v-model="selectedHostId" :options="hostOptions" placeholder="选择主机" style="width:250px" filterable />
+            <t-select v-model="selectedHostId" :options="hostOptions" :placeholder="$t('monitor.selectHost')" style="width:250px" filterable />
             <t-select v-model="timeRange" :options="timeOptions" style="width:120px" />
-            <t-button @click="loadMetrics" :loading="metricsLoading">刷新</t-button>
+            <t-button @click="loadMetrics" :loading="metricsLoading">{{ $t('common.refresh') }}</t-button>
           </div>
           <div v-if="latestMetric" style="margin-bottom:16px">
             <t-row :gutter="[16,16]">
               <t-col :span="3">
                 <t-card :bordered="false" class="metric-card">
-                  <div class="metric-label">CPU</div>
+                  <div class="metric-label">{{ $t('monitor.cpuLabel') }}</div>
                   <div class="metric-value">{{ latestMetric.cpu_percent?.toFixed(1) || '-' }}%</div>
                 </t-card>
               </t-col>
               <t-col :span="3">
                 <t-card :bordered="false" class="metric-card">
-                  <div class="metric-label">内存</div>
+                  <div class="metric-label">{{ $t('monitor.memoryLabel') }}</div>
                   <div class="metric-value">{{ latestMetric.memory_percent?.toFixed(1) || '-' }}%</div>
                 </t-card>
               </t-col>
               <t-col :span="3">
                 <t-card :bordered="false" class="metric-card">
-                  <div class="metric-label">磁盘</div>
+                  <div class="metric-label">{{ $t('monitor.diskLabel') }}</div>
                   <div class="metric-value">{{ latestMetric.disk_percent?.toFixed(1) || '-' }}%</div>
                 </t-card>
               </t-col>
               <t-col :span="3">
                 <t-card :bordered="false" class="metric-card">
-                  <div class="metric-label">网络入</div>
+                  <div class="metric-label">{{ $t('monitor.networkIn') }}</div>
                   <div class="metric-value">{{ latestMetric.network_in_mbps?.toFixed(1) || '-' }} Mbps</div>
                 </t-card>
               </t-col>
@@ -49,13 +49,13 @@
       </t-tab-panel>
     </t-tabs>
 
-    <t-dialog v-model:visible="showRuleCreate" header="创建告警规则" @confirm="onCreateRule">
+    <t-dialog v-model:visible="showRuleCreate" :header="$t('monitor.createAlertRule')" @confirm="onCreateRule">
       <t-form :data="ruleForm" label-align="top">
-        <t-form-item label="名称"><t-input v-model="ruleForm.name" /></t-form-item>
-        <t-form-item label="指标类型"><t-input v-model="ruleForm.metric_type" placeholder="cpu_percent, memory_percent..." /></t-form-item>
-        <t-form-item label="条件"><t-select v-model="ruleForm.condition" :options="conditionOptions" /></t-form-item>
-        <t-form-item label="阈值"><t-input-number v-model="ruleForm.threshold" /></t-form-item>
-        <t-form-item label="严重程度"><t-select v-model="ruleForm.severity" :options="severityOptions" /></t-form-item>
+        <t-form-item :label="$t('monitor.ruleName')"><t-input v-model="ruleForm.name" /></t-form-item>
+        <t-form-item :label="$t('monitor.metricTypeLabel')"><t-input v-model="ruleForm.metric_type" placeholder="cpu_percent, memory_percent..." /></t-form-item>
+        <t-form-item :label="$t('monitor.conditionLabel')"><t-select v-model="ruleForm.condition" :options="conditionOptions" /></t-form-item>
+        <t-form-item :label="$t('monitor.thresholdLabel')"><t-input-number v-model="ruleForm.threshold" /></t-form-item>
+        <t-form-item :label="$t('monitor.severityLabel')"><t-select v-model="ruleForm.severity" :options="severityOptions" /></t-form-item>
       </t-form>
     </t-dialog>
   </div>
@@ -63,16 +63,18 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { hostApi, monitorApi } from '@/api';
 
+const { t } = useI18n();
 const activeTab = ref('metrics');
 const selectedHostId = ref<number | undefined>(undefined);
 const hostOptions = ref<any[]>([]);
 const timeRange = ref(1);
 const timeOptions = [
-  { label: '1小时', value: 1 }, { label: '6小时', value: 6 },
-  { label: '24小时', value: 24 }, { label: '7天', value: 168 },
+  { label: t('monitor.hours1'), value: 1 }, { label: t('monitor.hours6'), value: 6 },
+  { label: t('monitor.hours24'), value: 24 }, { label: t('monitor.days7'), value: 168 },
 ];
 const metrics = ref<any[]>([]);
 const latestMetric = ref<any>(null);
@@ -86,32 +88,32 @@ const ruleForm = reactive({
 });
 
 const conditionOptions = [
-  { label: '大于', value: 'gt' }, { label: '小于', value: 'lt' },
-  { label: '大于等于', value: 'gte' }, { label: '小于等于', value: 'lte' },
+  { label: t('monitor.gt'), value: 'gt' }, { label: t('monitor.lt'), value: 'lt' },
+  { label: t('monitor.gte'), value: 'gte' }, { label: t('monitor.lte'), value: 'lte' },
 ];
 const severityOptions = [
-  { label: '信息', value: 'info' }, { label: '警告', value: 'warning' }, { label: '严重', value: 'critical' },
+  { label: t('monitor.info'), value: 'info' }, { label: t('monitor.warning'), value: 'warning' }, { label: t('monitor.critical'), value: 'critical' },
 ];
 
 const metricColumns = [
-  { colKey: 'collected_at', title: '时间', width: 180 },
-  { colKey: 'cpu_percent', title: 'CPU%', width: 80 },
-  { colKey: 'memory_percent', title: '内存%', width: 80 },
-  { colKey: 'disk_percent', title: '磁盘%', width: 80 },
-  { colKey: 'network_in_mbps', title: '网络入(Mbps)', width: 100 },
-  { colKey: 'network_out_mbps', title: '网络出(Mbps)', width: 100 },
-  { colKey: 'load_1min', title: 'Load1', width: 80 },
+  { colKey: 'collected_at', title: t('monitor.collectedAt'), width: 180 },
+  { colKey: 'cpu_percent', title: t('monitor.cpuPercent'), width: 80 },
+  { colKey: 'memory_percent', title: t('monitor.memoryPercent'), width: 80 },
+  { colKey: 'disk_percent', title: t('monitor.diskPercent'), width: 80 },
+  { colKey: 'network_in_mbps', title: t('monitor.networkInMbps'), width: 100 },
+  { colKey: 'network_out_mbps', title: t('monitor.networkOutMbps'), width: 100 },
+  { colKey: 'load_1min', title: t('monitor.load1'), width: 80 },
 ];
 
 const ruleColumns = [
-  { colKey: 'name', title: '名称' },
-  { colKey: 'metric_type', title: '指标' },
-  { colKey: 'condition', title: '条件' },
-  { colKey: 'threshold', title: '阈值' },
-  { colKey: 'severity', title: '严重程度' },
-  { colKey: 'is_enabled', title: '启用' },
-  { colKey: 'actions', title: '操作',
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeleteRule(row.id) } }, '删除')
+  { colKey: 'name', title: t('monitor.ruleName') },
+  { colKey: 'metric_type', title: t('monitor.metricTypeLabel') },
+  { colKey: 'condition', title: t('monitor.conditionLabel') },
+  { colKey: 'threshold', title: t('monitor.thresholdLabel') },
+  { colKey: 'severity', title: t('monitor.severityLabel') },
+  { colKey: 'is_enabled', title: t('common.enabled') },
+  { colKey: 'actions', title: t('common.actions'),
+    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeleteRule(row.id) } }, t('common.delete'))
   },
 ];
 
@@ -140,7 +142,7 @@ async function loadRules() {
 
 async function onCreateRule() {
   await monitorApi.createAlertRule(ruleForm);
-  MessagePlugin.success('创建成功');
+  MessagePlugin.success(t('monitor.ruleCreated'));
   showRuleCreate.value = false;
   loadRules();
 }

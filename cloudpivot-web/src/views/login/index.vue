@@ -51,7 +51,7 @@
         <t-form-item :label="$t('login.username')" name="username">
           <t-input v-model="registerData.username" />
         </t-form-item>
-        <t-form-item :label="'Email'" name="email">
+        <t-form-item :label="$t('login.email')" name="email">
           <t-input v-model="registerData.email" />
         </t-form-item>
         <t-form-item :label="$t('login.password')" name="password">
@@ -65,11 +65,13 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { authApi } from '@/api';
 import { useUserStore } from '@/stores/app';
 
 const router = useRouter();
+const { t } = useI18n();
 const userStore = useUserStore();
 const loading = ref(false);
 const showRegister = ref(false);
@@ -79,8 +81,8 @@ const formData = reactive({ username: '', password: '' });
 const registerData = reactive({ username: '', email: '', password: '' });
 
 const formRules = {
-  username: [{ required: true, message: '请输入用户名' }],
-  password: [{ required: true, message: '请输入密码' }],
+  username: [{ required: true, message: t('login.enterUsername') }],
+  password: [{ required: true, message: t('login.enterPassword') }],
 };
 
 async function onSubmit({ validateResult }: any) {
@@ -91,7 +93,7 @@ async function onSubmit({ validateResult }: any) {
     userStore.setTokens(res.access_token, res.refresh_token);
     const userInfo = await authApi.getMe();
     userStore.setUser(userInfo);
-    MessagePlugin.success('登录成功');
+    MessagePlugin.success(t('login.loginSuccess'));
     router.push('/dashboard');
   } catch (e: any) {
     // error handled by interceptor
@@ -104,7 +106,7 @@ async function onRegister() {
   registerLoading.value = true;
   try {
     await authApi.register(registerData);
-    MessagePlugin.success('注册成功，请登录');
+    MessagePlugin.success(t('login.registerSuccess'));
     showRegister.value = false;
   } catch (e: any) {
     // error handled by interceptor

@@ -5,8 +5,8 @@
         <t-card :bordered="false">
           <template #actions>
             <t-radio-group v-model="showAll" variant="default-filled" @change="loadContainers">
-              <t-radio-button :value="false">运行中</t-radio-button>
-              <t-radio-button :value="true">全部</t-radio-button>
+              <t-radio-button :value="false">{{ $t('docker.runningTab') }}</t-radio-button>
+              <t-radio-button :value="true">{{ $t('docker.allTab') }}</t-radio-button>
             </t-radio-group>
             <t-button variant="outline" @click="loadContainers">
               <template #icon><t-icon name="refresh" /></template>
@@ -37,29 +37,29 @@
     </t-tabs>
 
     <!-- Container Action Dialogs -->
-    <t-dialog v-model:visible="showLogs" header="容器日志" :footer="false" width="700px">
+    <t-dialog v-model:visible="showLogs" :header="$t('docker.containerLogs')" :footer="false" width="700px">
       <div class="log-viewer">
         <pre>{{ containerLogs }}</pre>
       </div>
     </t-dialog>
 
-    <t-dialog v-model:visible="showPull" header="拉取镜像" @confirm="onPullImage">
+    <t-dialog v-model:visible="showPull" :header="$t('docker.pullImage')" @confirm="onPullImage">
       <t-form :data="pullForm" label-align="top">
-        <t-form-item label="镜像仓库"><t-input v-model="pullForm.repository" placeholder="e.g. nginx" /></t-form-item>
-        <t-form-item label="标签"><t-input v-model="pullForm.tag" placeholder="latest" /></t-form-item>
+        <t-form-item :label="$t('docker.repository')"><t-input v-model="pullForm.repository" placeholder="e.g. nginx" /></t-form-item>
+        <t-form-item :label="$t('docker.tag')"><t-input v-model="pullForm.tag" placeholder="latest" /></t-form-item>
       </t-form>
     </t-dialog>
 
-    <t-dialog v-model:visible="showHostCreate" header="添加Docker主机" @confirm="onCreateHost">
+    <t-dialog v-model:visible="showHostCreate" :header="$t('docker.addDockerHost')" @confirm="onCreateHost">
       <t-form :data="hostForm" label-align="top">
-        <t-form-item label="名称"><t-input v-model="hostForm.name" /></t-form-item>
-        <t-form-item label="地址"><t-input v-model="hostForm.host" placeholder="unix:///var/run/docker.sock" /></t-form-item>
+        <t-form-item :label="$t('common.name')"><t-input v-model="hostForm.name" /></t-form-item>
+        <t-form-item :label="$t('docker.address')"><t-input v-model="hostForm.host" placeholder="unix:///var/run/docker.sock" /></t-form-item>
       </t-form>
     </t-dialog>
 
-    <t-dialog v-model:visible="showExec" header="执行命令" @confirm="onExec">
+    <t-dialog v-model:visible="showExec" :header="$t('docker.execCommand')" @confirm="onExec">
       <t-form :data="execForm" label-align="top">
-        <t-form-item label="命令"><t-input v-model="execForm.command" /></t-form-item>
+        <t-form-item :label="$t('docker.exec')"><t-input v-model="execForm.command" /></t-form-item>
       </t-form>
     </t-dialog>
   </div>
@@ -68,8 +68,10 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { useI18n } from 'vue-i18n';
 import { dockerApi } from '@/api';
 
+const { t } = useI18n();
 const activeTab = ref('containers');
 const containers = ref<any[]>([]);
 const images = ref<any[]>([]);
@@ -91,41 +93,41 @@ const execForm = reactive({ command: '' });
 
 const containerColumns = [
   { colKey: 'id', title: 'ID', width: 100 },
-  { colKey: 'name', title: '名称', width: 150 },
-  { colKey: 'image', title: '镜像', width: 200, ellipsis: true },
-  { colKey: 'state', title: '状态', width: 80,
+  { colKey: 'name', title: t('common.name'), width: 150 },
+  { colKey: 'image', title: t('docker.image'), width: 200, ellipsis: true },
+  { colKey: 'state', title: t('common.status'), width: 80,
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.state === 'running' ? 'success' : 'default', size: 'small' } }, row.state)
   },
-  { colKey: 'status', title: '详情', width: 150 },
-  { colKey: 'actions', title: '操作', width: 280,
+  { colKey: 'status', title: t('docker.detail'), width: 150 },
+  { colKey: 'actions', title: t('common.actions'), width: 280,
     cell: (_h: any, { row }: any) => _h('div', { style: 'display:flex;gap:4px;flex-wrap:wrap' }, [
-      row.state !== 'running' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'primary' }, on: { click: () => onStart(row.id) } }, '启动') : null,
-      row.state === 'running' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'warning' }, on: { click: () => onStop(row.id) } }, '停止') : null,
-      _h('t-button', { props: { size: 'small', variant: 'text', theme: 'primary' }, on: { click: () => onRestart(row.id) } }, '重启'),
-      _h('t-button', { props: { size: 'small', variant: 'text' }, on: { click: () => onViewLogs(row.id) } }, '日志'),
-      _h('t-button', { props: { size: 'small', variant: 'text' }, on: { click: () => { execContainerId.value = row.id; showExec.value = true; } } }, 'Exec'),
-      _h('t-button', { props: { size: 'small', variant: 'text', theme: 'danger' }, on: { click: () => onRemove(row.id) } }, '删除'),
+      row.state !== 'running' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'primary' }, on: { click: () => onStart(row.id) } }, t('docker.start')) : null,
+      row.state === 'running' ? _h('t-button', { props: { size: 'small', variant: 'text', theme: 'warning' }, on: { click: () => onStop(row.id) } }, t('docker.stop')) : null,
+      _h('t-button', { props: { size: 'small', variant: 'text', theme: 'primary' }, on: { click: () => onRestart(row.id) } }, t('docker.restart')),
+      _h('t-button', { props: { size: 'small', variant: 'text' }, on: { click: () => onViewLogs(row.id) } }, t('docker.logs')),
+      _h('t-button', { props: { size: 'small', variant: 'text' }, on: { click: () => { execContainerId.value = row.id; showExec.value = true; } } }, t('docker.exec')),
+      _h('t-button', { props: { size: 'small', variant: 'text', theme: 'danger' }, on: { click: () => onRemove(row.id) } }, t('common.delete')),
     ].filter(Boolean))
   },
 ];
 
 const imageColumns = [
   { colKey: 'id', title: 'ID', width: 100 },
-  { colKey: 'repo_tags', title: '标签', ellipsis: true,
+  { colKey: 'repo_tags', title: t('common.name'), ellipsis: true,
     cell: (h: any, { row }: any) => h('span', (row.repo_tags || []).join(', '))
   },
-  { colKey: 'size_mb', title: '大小(MB)', width: 100 },
-  { colKey: 'actions', title: '操作', width: 80,
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { size: 'small', variant: 'text', theme: 'danger' }, on: { click: () => onRemoveImage(row.id) } }, '删除')
+  { colKey: 'size_mb', title: t('docker.sizeMB'), width: 100 },
+  { colKey: 'actions', title: t('common.actions'), width: 80,
+    cell: (_h: any, { row }: any) => _h('t-button', { props: { size: 'small', variant: 'text', theme: 'danger' }, on: { click: () => onRemoveImage(row.id) } }, t('common.delete'))
   },
 ];
 
 const hostColumns = [
-  { colKey: 'name', title: '名称' },
-  { colKey: 'host', title: '地址' },
-  { colKey: 'is_active', title: '状态' },
-  { colKey: 'actions', title: '操作',
-    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeleteHost(row.id) } }, '删除')
+  { colKey: 'name', title: t('common.name') },
+  { colKey: 'host', title: t('docker.address') },
+  { colKey: 'is_active', title: t('common.status') },
+  { colKey: 'actions', title: t('common.actions'),
+    cell: (_h: any, { row }: any) => _h('t-button', { props: { variant: 'text', theme: 'danger', size: 'small' }, on: { click: () => onDeleteHost(row.id) } }, t('common.delete'))
   },
 ];
 
@@ -144,10 +146,10 @@ async function loadDockerHosts() {
   try { dockerHosts.value = await dockerApi.listHosts(); } finally { hostLoading.value = false; }
 }
 
-async function onStart(id: string) { await dockerApi.startContainer(id); MessagePlugin.success('已启动'); loadContainers(); }
-async function onStop(id: string) { await dockerApi.stopContainer(id); MessagePlugin.success('已停止'); loadContainers(); }
-async function onRestart(id: string) { await dockerApi.restartContainer(id); MessagePlugin.success('已重启'); loadContainers(); }
-async function onRemove(id: string) { await dockerApi.removeContainer(id); MessagePlugin.success('已删除'); loadContainers(); }
+async function onStart(id: string) { await dockerApi.startContainer(id); MessagePlugin.success(t('docker.started')); loadContainers(); }
+async function onStop(id: string) { await dockerApi.stopContainer(id); MessagePlugin.success(t('docker.stoppedMsg')); loadContainers(); }
+async function onRestart(id: string) { await dockerApi.restartContainer(id); MessagePlugin.success(t('docker.restarted')); loadContainers(); }
+async function onRemove(id: string) { await dockerApi.removeContainer(id); MessagePlugin.success(t('docker.removed')); loadContainers(); }
 
 async function onViewLogs(id: string) {
   try {
@@ -159,13 +161,13 @@ async function onViewLogs(id: string) {
 
 async function onExec() {
   await dockerApi.execInContainer(execContainerId.value, execForm.command);
-  MessagePlugin.success('命令已执行');
+  MessagePlugin.success(t('docker.commandExecuted'));
   showExec.value = false;
 }
 
 async function onPullImage() {
   await dockerApi.pullImage(pullForm.repository, pullForm.tag);
-  MessagePlugin.success('拉取成功');
+  MessagePlugin.success(t('docker.pullSuccess'));
   showPull.value = false;
   loadImages();
 }

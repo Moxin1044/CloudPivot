@@ -59,8 +59,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { dashboardApi } from '@/api';
 import dayjs from 'dayjs';
+
+const { t } = useI18n();
 
 const data = ref<any>({ overview: {}, resourceUsage: [], recentAudits: [], recentAlerts: [] });
 const chartRef = ref<HTMLElement>();
@@ -80,13 +83,13 @@ const statCards = computed(() => {
 });
 
 const auditColumns = [
-  { colKey: 'username', title: 'User', width: 120 },
-  { colKey: 'host_name', title: 'Host', width: 150 },
-  { colKey: 'command', title: 'Command', ellipsis: true },
-  { colKey: 'risk_level', title: 'Risk', width: 80,
+  { colKey: 'username', title: t('dashboard.user'), width: 120 },
+  { colKey: 'host_name', title: t('dashboard.host'), width: 150 },
+  { colKey: 'command', title: t('dashboard.command'), ellipsis: true },
+  { colKey: 'risk_level', title: t('dashboard.risk'), width: 80,
     cell: (h: any, { row }: any) => h('t-tag', { props: { theme: row.risk_level === 'danger' ? 'danger' : row.risk_level === 'warning' ? 'warning' : 'default', size: 'small' } }, row.risk_level)
   },
-  { colKey: 'executed_at', title: 'Time', width: 180, cell: (h: any, { row }: any) => formatTime(row.executed_at) },
+  { colKey: 'executed_at', title: t('dashboard.time'), width: 180, cell: (h: any, { row }: any) => formatTime(row.executed_at) },
 ];
 
 function formatTime(t: string) {

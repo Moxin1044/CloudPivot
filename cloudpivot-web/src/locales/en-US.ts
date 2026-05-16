@@ -130,6 +130,7 @@ export default {
     selectHostAndConnect: 'Select a host and connect',
     clickNewTab: 'Click New Tab to create a terminal session',
     newTerminal: 'New Terminal',
+    terminalLabel: 'Terminal',
   },
   team: {
     title: 'Teams',
@@ -336,5 +337,6 @@ export default {
     feishuTip: 'Feishu bot webhook URL',
     dingtalkTip: 'DingTalk bot webhook URL',
     channelsTip: 'Check the channels to send alerts to the configured addresses',
+    logout: 'Logout',
   },
 };
